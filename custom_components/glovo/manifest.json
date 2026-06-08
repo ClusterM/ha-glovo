@@ -1,0 +1,12 @@
+{
+  "domain": "glovo",
+  "name": "Glovo",
+  "codeowners": ["@ClusterM"],
+  "config_flow": true,
+  "documentation": "https://github.com/ClusterM/ha-glovo",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/ClusterM/ha-glovo/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,105 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Вставьте refresh-токен с glovoapp.com (ключ `glovo_refresh_token` в localStorage).",
+        "data": {
+          "refresh_token": "Refresh-токен",
+          "scan_interval": "Интервал обновления (секунды)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Повторная авторизация Glovo",
+        "description": "Сохранённый токен отклонён. Вставьте новый refresh-токен с glovoapp.com.",
+        "data": {
+          "refresh_token": "Refresh-токен"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Неверный refresh-токен.",
+      "cannot_connect": "Не удалось подключиться к Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo уже настроен.",
+      "reauth_successful": "Повторная авторизация прошла успешно."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметры Glovo",
+        "description": "Оставьте поле refresh-токена пустым, чтобы сохранить текущий.",
+        "data": {
+          "scan_interval": "Интервал обновления (секунды)",
+          "refresh_token": "Новый refresh-токен (необязательно)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Неверный refresh-токен.",
+      "cannot_connect": "Не удалось подключиться к Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Статус заказа",
+        "state": {
+          "SCHEDULED": "Запланирован",
+          "PREPARING": "Готовится",
+          "COURIER_ASSIGNED": "Курьер назначен",
+          "COURIER_WAITING": "Курьер ждёт в магазине",
+          "AWAITING_PICKUP": "Ожидает курьера",
+          "ON_THE_WAY": "В пути",
+          "ARRIVING": "Подъезжает",
+          "DELIVERED": "Доставлен",
+          "CANCELED": "Отменён",
+          "UNKNOWN": "Неизвестно"
+        }
+      },
+      "step": {
+        "name": "Этап",
+        "state": {
+          "SCHEDULED": "Запланирован",
+          "IN_PROGRESS": "Выполняется",
+          "DELIVERED": "Доставлен",
+          "CANCELED": "Отменён"
+        }
+      },
+      "store_name": { "name": "Магазин" },
+      "order_count": { "name": "Активные заказы" },
+      "courier_name": { "name": "Курьер" },
+      "courier_status": {
+        "name": "Статус курьера",
+        "state": {
+          "ASSIGNED": "Назначен",
+          "WAITING": "Ждёт в магазине",
+          "ON_THE_WAY": "В пути",
+          "ARRIVING": "Подъезжает"
+        }
+      },
+      "partner_status": {
+        "name": "Статус магазина",
+        "state": {
+          "PREPARING": "Готовит",
+          "READY": "Готово"
+        }
+      },
+      "progress_percent": { "name": "Прогресс" },
+      "eta_minutes_left": { "name": "До прибытия (мин)" },
+      "eta_text": { "name": "Время прибытия" },
+      "eta_window": { "name": "Окно прибытия" },
+      "poll_interval_sec": { "name": "Рекомендуемый интервал опроса" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Активный заказ" },
+      "is_late": { "name": "Опаздывает" },
+      "chat_available": { "name": "Чат доступен" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Местоположение курьера" }
+    }
+  }
+}
