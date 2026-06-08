@@ -28,21 +28,12 @@ class GlovoSensorEntityDescription(SensorEntityDescription):
     primary: bool = False
 
 
-def _eta_window(summary: dict[str, Any]) -> str | None:
-    if summary.get("eta_format") != "timestamp":
-        return None
-    low, high = summary.get("eta_min"), summary.get("eta_max")
-    if not low or not high:
-        return None
-    return f"{low} – {high}"
-
-
 SENSORS: tuple[GlovoSensorEntityDescription, ...] = (
     GlovoSensorEntityDescription(
         key="overall_status",
         translation_key="overall_status",
         device_class=SensorDeviceClass.ENUM,
-        options=list(glovo.ENUMS["overall.status"].keys()),
+        options=glovo.ha_enum_options("overall.status"),
         icon="mdi:moped",
         value_fn=lambda s: s.get("overall_status"),
         primary=True,
@@ -51,7 +42,8 @@ SENSORS: tuple[GlovoSensorEntityDescription, ...] = (
         key="step",
         translation_key="step",
         device_class=SensorDeviceClass.ENUM,
-        options=list(glovo.ENUMS["tracking.step"].keys()),
+        options=glovo.ha_enum_options("tracking.step"),
+        entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:progress-clock",
         value_fn=lambda s: s.get("step"),
     ),
@@ -77,7 +69,8 @@ SENSORS: tuple[GlovoSensorEntityDescription, ...] = (
         key="courier_status",
         translation_key="courier_status",
         device_class=SensorDeviceClass.ENUM,
-        options=list(glovo.ENUMS["tracking.courierStatus"].keys()),
+        options=glovo.ha_enum_options("tracking.courierStatus"),
+        entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:bike-fast",
         value_fn=lambda s: s.get("courier_status"),
     ),
@@ -85,7 +78,8 @@ SENSORS: tuple[GlovoSensorEntityDescription, ...] = (
         key="partner_status",
         translation_key="partner_status",
         device_class=SensorDeviceClass.ENUM,
-        options=list(glovo.ENUMS["tracking.partnerStatus"].keys()),
+        options=glovo.ha_enum_options("tracking.partnerStatus"),
+        entity_category=EntityCategory.DIAGNOSTIC,
         icon="mdi:chef-hat",
         value_fn=lambda s: s.get("partner_status"),
     ),
@@ -97,24 +91,26 @@ SENSORS: tuple[GlovoSensorEntityDescription, ...] = (
         value_fn=lambda s: s.get("progress_percent"),
     ),
     GlovoSensorEntityDescription(
-        key="eta_minutes_left",
-        translation_key="eta_minutes_left",
+        key="eta_min",
+        translation_key="eta_min",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        icon="mdi:clock-start",
+        value_fn=lambda s: s.get("eta_min"),
+    ),
+    GlovoSensorEntityDescription(
+        key="eta_max",
+        translation_key="eta_max",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
         icon="mdi:clock-end",
-        value_fn=lambda s: s.get("eta_minutes_left"),
+        value_fn=lambda s: s.get("eta_max"),
     ),
     GlovoSensorEntityDescription(
-        key="eta_text",
-        translation_key="eta_text",
+        key="original_eta",
+        translation_key="original_eta",
         icon="mdi:clock-outline",
-        value_fn=lambda s: s.get("eta_text"),
-    ),
-    GlovoSensorEntityDescription(
-        key="eta_window",
-        translation_key="eta_window",
-        icon="mdi:clock-time-four-outline",
-        value_fn=_eta_window,
+        value_fn=lambda s: s.get("original_eta"),
     ),
     GlovoSensorEntityDescription(
         key="poll_interval_sec",

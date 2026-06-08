@@ -49,11 +49,11 @@
         "state": {
           "scheduled": "Запланирован",
           "preparing": "Готовится",
-          "courier_assigned": "Курьер назначен",
+          "courier_assigned": "Готовится, курьер назначен",
           "courier_waiting": "Курьер ждёт в магазине",
-          "awaiting_pickup": "Ожидает курьера",
-          "on_the_way": "В пути",
-          "arriving": "Подъезжает",
+          "awaiting_pickup": "Магазин ожидает курьера",
+          "on_the_way": "Курьер в пути к вам",
+          "arriving": "Курьер подъезжает к вам",
           "delivered": "Доставлен",
           "canceled": "Отменён",
           "unknown": "Неизвестно"
@@ -70,7 +70,7 @@
       },
       "store_name": { "name": "Магазин" },
       "order_count": { "name": "Активные заказы" },
-      "courier_name": { "name": "Курьер" },
+      "courier_name": { "name": "Имя курьера" },
       "courier_status": {
         "name": "Статус курьера",
         "state": {
@@ -88,9 +88,9 @@
         }
       },
       "progress_percent": { "name": "Прогресс" },
-      "eta_minutes_left": { "name": "До прибытия (мин)" },
-      "eta_text": { "name": "Время прибытия" },
-      "eta_window": { "name": "Окно прибытия" },
+      "eta_min": { "name": "До прибытия мин." },
+      "eta_max": { "name": "До прибытия макс." },
+      "original_eta": { "name": "Изначальное время прибытия" },
       "poll_interval_sec": { "name": "Рекомендуемый интервал опроса" }
     },
     "binary_sensor": {
@@ -100,6 +100,19 @@
     },
     "device_tracker": {
       "courier": { "name": "Местоположение курьера" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Статус заказа: запланирован",
+      "preparing": "Статус заказа: готовится",
+      "courier_assigned": "Статус заказа: готовится, курьер назначен",
+      "courier_waiting": "Статус заказа: курьер ждёт в магазине",
+      "awaiting_pickup": "Статус заказа: магазин ожидает курьера",
+      "on_the_way": "Статус заказа: курьер в пути к вам",
+      "arriving": "Статус заказа: курьер подъезжает к вам",
+      "delivered": "Статус заказа: доставлен",
+      "canceled": "Статус заказа: отменён"
     }
   }
 }

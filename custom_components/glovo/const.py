@@ -6,6 +6,9 @@ from homeassistant.const import Platform
 
 DOMAIN = "glovo"
 
+# Sensor key used for the combined order status enum.
+OVERALL_STATUS_SENSOR_KEY = "overall_status"
+
 # Config entry data keys.
 CONF_REFRESH_TOKEN = "refresh_token"
 # Full token state as a JSON string produced by the glovo library

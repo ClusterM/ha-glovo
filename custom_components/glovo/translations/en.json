@@ -49,11 +49,11 @@
         "state": {
           "scheduled": "Scheduled",
           "preparing": "Preparing",
-          "courier_assigned": "Courier assigned",
+          "courier_assigned": "Preparing, courier assigned",
           "courier_waiting": "Courier waiting at store",
-          "awaiting_pickup": "Awaiting pickup",
-          "on_the_way": "On the way",
-          "arriving": "Arriving",
+          "awaiting_pickup": "Store awaiting courier",
+          "on_the_way": "Courier on the way to you",
+          "arriving": "Courier arriving at your location",
           "delivered": "Delivered",
           "canceled": "Canceled",
           "unknown": "Unknown"
@@ -70,7 +70,7 @@
       },
       "store_name": { "name": "Store" },
       "order_count": { "name": "Active orders" },
-      "courier_name": { "name": "Courier" },
+      "courier_name": { "name": "Courier name" },
       "courier_status": {
         "name": "Courier status",
         "state": {
@@ -88,9 +88,9 @@
         }
       },
       "progress_percent": { "name": "Progress" },
-      "eta_minutes_left": { "name": "ETA minutes left" },
-      "eta_text": { "name": "ETA" },
-      "eta_window": { "name": "ETA window" },
+      "eta_min": { "name": "ETA min" },
+      "eta_max": { "name": "ETA max" },
+      "original_eta": { "name": "Original ETA" },
       "poll_interval_sec": { "name": "Recommended poll interval" }
     },
     "binary_sensor": {
@@ -100,6 +100,19 @@
     },
     "device_tracker": {
       "courier": { "name": "Courier location" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Order status becomes scheduled",
+      "preparing": "Order status becomes preparing",
+      "courier_assigned": "Order status becomes preparing, courier assigned",
+      "courier_waiting": "Order status becomes courier waiting at store",
+      "awaiting_pickup": "Order status becomes store awaiting courier",
+      "on_the_way": "Order status becomes courier on the way to you",
+      "arriving": "Order status becomes courier arriving at your location",
+      "delivered": "Order status becomes delivered",
+      "canceled": "Order status becomes canceled"
     }
   }
 }

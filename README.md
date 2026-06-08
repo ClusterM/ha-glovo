@@ -11,6 +11,7 @@ Home Assistant custom integration for the [Glovo](https://glovoapp.com/) deliver
 - **Re-authentication flow** — if the token is ever rejected, Home Assistant prompts you for a new one
 - **Options flow** — change the update interval (and refresh token) without removing the integration
 - **Localized** — English and Russian translations
+- **Device triggers** — one automation trigger per order status (pick from the Glovo device in the UI)
 
 ## Installation
 
@@ -54,17 +55,16 @@ All entities are grouped under one **Glovo** device. When there is no active ord
 
 | Entity | Description |
 |--------|-------------|
-| Order status | Combined high-level status (`PREPARING`, `ON_THE_WAY`, `ARRIVING`, `DELIVERED`, …). The full summary is available in its attributes. |
-| Stage | Raw lifecycle step (`IN_PROGRESS`, `DELIVERED`, `CANCELED`, …) |
+| Order status | Combined high-level status (`preparing`, `on_the_way`, `arriving`, `delivered`, …). See [Order lifecycle](#order-lifecycle) below. Full summary is in attributes. |
+| Stage | Raw lifecycle step (`in_progress`, `delivered`, `canceled`, …) — diagnostic |
 | Store | Store / restaurant name |
 | Active orders | Number of currently active orders |
 | Courier | Courier name |
-| Courier status | `ASSIGNED`, `WAITING`, `ON_THE_WAY`, `ARRIVING` |
-| Store status | `PREPARING`, `READY` |
+| Courier status | `assigned`, `waiting`, `on_the_way`, `arriving` — diagnostic |
+| Store status | `preparing`, `ready` — diagnostic |
 | Progress | Delivery progress, % |
-| ETA minutes left | Minutes until arrival (countdown mode) |
-| ETA | Human-readable ETA text |
-| ETA window | Estimated arrival time range (e.g. `16:05 – 16:25`) |
+| ETA min / ETA max | Minutes until arrival (lower and upper bound) |
+| Original ETA | Initial ETA window before a late re-estimate |
 | Recommended poll interval | API-suggested polling interval (diagnostic, disabled by default) |
 
 ### Binary sensors
@@ -80,6 +80,62 @@ All entities are grouped under one **Glovo** device. When there is no active ord
 | Entity | Description |
 |--------|-------------|
 | Courier location | Courier's live GPS position. Extra attributes: `heading`, `courier_name`, `courier_count`. |
+
+## Order lifecycle
+
+The **Order status** sensor combines three API fields — `step`, `partnerStatus` (store), and `courierStatus` — into one enum that is easier to automate against.
+
+Typical happy-path flow:
+
+```mermaid
+flowchart LR
+    scheduled --> preparing
+    preparing --> courier_assigned
+    courier_assigned --> courier_waiting
+    courier_waiting --> awaiting_pickup
+    awaiting_pickup --> on_the_way
+    on_the_way --> arriving
+    arriving --> delivered
+```
+
+| Order status | `step` | `partner_status` | `courier_status` | Meaning |
+|--------------|--------|------------------|------------------|---------|
+| `scheduled` | `SCHEDULED` | — | — | Order scheduled for later |
+| `preparing` | `IN_PROGRESS` | `PREPARING` | — | Store is preparing, no courier yet |
+| `courier_assigned` | `IN_PROGRESS` | `PREPARING` | `ASSIGNED` | Store preparing, courier assigned |
+| `courier_waiting` | `IN_PROGRESS` | `PREPARING` | `WAITING` | Courier at the store, order still preparing |
+| `awaiting_pickup` | `IN_PROGRESS` | `READY` | not `WAITING` / `ON_THE_WAY` / `ARRIVING` | Order ready, waiting for pickup |
+| `on_the_way` | `IN_PROGRESS` | * | `ON_THE_WAY` | Courier en route to you |
+| `arriving` | `IN_PROGRESS` | * | `ARRIVING` | Courier arriving at your location |
+| `delivered` | `DELIVERED` | — | — | Delivered |
+| `canceled` | `CANCELED` / `CANCELLED` | — | — | Canceled |
+
+Once the courier has left the store, `courier_status` drives the status (`on_the_way`, `arriving`). Before pickup, store and courier states are combined as in the table.
+
+Machine values are lowercase (e.g. `courier_assigned`). Use these in YAML automations; the UI shows translated labels (Russian: «Готовится, курьер назначен» for `courier_assigned`).
+
+## Automations
+
+### Device triggers (recommended)
+
+Settings → **Automations** → **Create automation** → **Device** → select the **Glovo** device. You get one trigger per order status, e.g. *Order status becomes courier on the way to you* or *Статус заказа: курьер в пути к вам*. Optional **For** duration is supported.
+
+### YAML example
+
+```yaml
+automation:
+  - alias: Glovo — courier arriving
+    triggers:
+      - trigger: state
+        entity_id: sensor.glovo_order_status
+        to: arriving
+    actions:
+      - action: notify.mobile_app_phone
+        data:
+          message: "Glovo courier is almost here"
+```
+
+Replace `sensor.glovo_order_status` with your entity id (Settings → Entities).
 
 ## How polling works
 

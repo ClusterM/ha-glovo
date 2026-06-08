@@ -27,6 +27,7 @@ class GlovoCourierTracker(GlovoEntity, TrackerEntity):
 
     _attr_translation_key = "courier"
     _attr_icon = "mdi:moped"
+    _attr_entity_category = None
 
     def __init__(self, coordinator: GlovoDataUpdateCoordinator) -> None:
         """Initialize the tracker."""

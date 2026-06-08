@@ -82,8 +82,8 @@ orders, order_count is 0 and all other fields are None. Example fields:
     progress_percent,
     is_late, lateness, lateness_text,
     eta_format,            # "timestamp" (range) | "countdown" (minutes)
-    eta_min, eta_max,      # range bounds; equal when counting down minutes
-    eta_minutes_left,      # int, only in countdown mode
+    eta_min, eta_max,      # minutes left to the lower/upper bound (ints);
+                           # equal when the API reports a single countdown
     eta_text, eta_former,
     courier_lat, courier_lon, courier_heading,
     poll_interval_sec
@@ -137,6 +137,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime
 from pathlib import Path
 from collections.abc import Callable
 from typing import Any, Literal
@@ -222,7 +223,7 @@ ENUMS: dict[str, dict[str, str]] = {
     "overall.status": {
         "SCHEDULED": "scheduled for later, not started yet",
         "PREPARING": "store is preparing the order, no courier assigned yet (obs)",
-        "COURIER_ASSIGNED": "store preparing, courier assigned and heading to the store (obs)",
+        "COURIER_ASSIGNED": "store preparing (PREPARING), courier assigned (ASSIGNED)",
         "COURIER_WAITING": "courier is at the store waiting for the order to be prepared (obs)",
         "AWAITING_PICKUP": "order is ready, waiting for courier pickup (at store or en route)",
         "ON_THE_WAY": "courier is on the way to you (obs)",
@@ -292,6 +293,28 @@ def describe(enum_key: str, value: Any) -> str:
         return "—"
     meaning = ENUMS.get(enum_key, {}).get(value)
     return f"{value} ({meaning})" if meaning else f"{value} (unknown)"
+
+
+def _ha_enum(value: str | None) -> str | None:
+    """Normalize an API enum string to a homeassistant state value.
+
+    Home Assistant stores enum states in lowercase and resolves UI translations
+    from entity.sensor.<key>.state.<value>. Automations should match these
+    machine values (e.g. ``delivered``), not the translated labels.
+    """
+    if value is None:
+        return None
+    normalized = value.lower()
+    if normalized == "unknown":
+        return None
+    if normalized == "cancelled":
+        normalized = "canceled"
+    return normalized
+
+
+def ha_enum_options(enum_key: str) -> list[str]:
+    """Return sorted lowercase options for a homeassistant enum sensor."""
+    return sorted({_ha_enum(key) for key in ENUMS[enum_key] if _ha_enum(key)})
 
 
 def _strip_html(text: str | None) -> str:
@@ -807,9 +830,9 @@ def empty_active_order_summary() -> dict[str, Any]:
         "eta_format": None,
         "eta_min": None,
         "eta_max": None,
-        "eta_minutes_left": None,
         "eta_text": None,
         "eta_former": None,
+        "original_eta": None,
         "courier_lat": None,
         "courier_lon": None,
         "courier_heading": None,
@@ -907,12 +930,42 @@ def _courier_count(
     return max(len(timeline_couriers), len(courier_markers))
 
 
-def _parse_eta(tracking: dict[str, Any]) -> dict[str, Any]:
-    """Normalize ETA into {format, min, max, minutes_left, text, former}.
+def _clock_to_minutes_left(clock: str | None, now: datetime) -> int | None:
+    """Convert a local "HH:MM" wall-clock time into minutes left from now.
 
-    timestamp format -> min/max are clock-time strings (a range).
-    countdown format -> min == max == minutes string; minutes_left is int.
+    Clock times are interpreted in the local timezone. A bound that already
+    passed yields a negative value (delivery running late); a value far in the
+    past is treated as belonging to the next day (handles midnight wrap).
     """
+    if not clock:
+        return None
+    match = re.match(r"^\s*(\d{1,2}):(\d{2})\s*$", clock)
+    if not match:
+        return None
+    target = now.replace(
+        hour=int(match.group(1)),
+        minute=int(match.group(2)),
+        second=0,
+        microsecond=0,
+    )
+    minutes = round((target - now).total_seconds() / 60)
+    if minutes < -360:
+        minutes += 24 * 60
+    return minutes
+
+
+def _parse_eta(tracking: dict[str, Any], now: datetime | None = None) -> dict[str, Any]:
+    """Normalize ETA into {format, min, max, text, former}.
+
+    `min`/`max` are always integer minutes left until arrival:
+      * timestamp format -> minutes left to the lower / upper clock-time bound
+        (e.g. "16:05 - 16:25" => min=minutes to 16:05, max=minutes to 16:25);
+      * countdown format -> min == max == the reported minutes value.
+    Clock-time bounds are computed against the local timezone.
+    """
+    if now is None:
+        now = datetime.now()
+
     payload = tracking.get("data") or {}
     eta = payload.get("eta") or {}
     event = (payload.get("event") or {}).get("data") or {}
@@ -920,36 +973,41 @@ def _parse_eta(tracking: dict[str, Any]) -> dict[str, Any]:
     eta_format = event.get("estimatedTimeOfArrivalFormat")
     text = eta.get("text")
     former = eta.get("formerEta")
-    eta_min: str | None = None
-    eta_max: str | None = None
-    minutes_left: int | None = None
+    eta_min: int | None = None
+    eta_max: int | None = None
+
+    low_clock: str | None = None
+    high_clock: str | None = None
+    countdown_value: str | None = None
 
     if eta_format == "timestamp":
-        eta_min = event.get("estimatedTimeOfArrivalRangeLower")
-        eta_max = event.get("estimatedTimeOfArrivalRangeUpper")
+        low_clock = event.get("estimatedTimeOfArrivalRangeLower")
+        high_clock = event.get("estimatedTimeOfArrivalRangeUpper")
     elif eta_format == "countdown":
-        value = event.get("estimatedTimeOfArrival")
-        eta_min = eta_max = value
-        if value is not None and str(value).isdigit():
-            minutes_left = int(value)
+        countdown_value = event.get("estimatedTimeOfArrival")
     else:
         # Fall back to parsing eta.text when the analytics block is absent.
         if text and " - " in text:
             eta_format = "timestamp"
             low, _, high = text.partition(" - ")
-            eta_min, eta_max = low.strip(), high.strip()
+            low_clock, high_clock = low.strip(), high.strip()
         elif text:
             m = re.search(r"(\d+)\s+minute", text)
             if m:
                 eta_format = "countdown"
-                minutes_left = int(m.group(1))
-                eta_min = eta_max = m.group(1)
+                countdown_value = m.group(1)
+
+    if eta_format == "timestamp":
+        eta_min = _clock_to_minutes_left(low_clock, now)
+        eta_max = _clock_to_minutes_left(high_clock, now)
+    elif eta_format == "countdown":
+        if countdown_value is not None and str(countdown_value).isdigit():
+            eta_min = eta_max = int(countdown_value)
 
     return {
         "format": eta_format,
         "min": eta_min,
         "max": eta_max,
-        "minutes_left": minutes_left,
         "text": text,
         "former": former,
     }
@@ -1054,22 +1112,27 @@ def summarize_active_order(
     return {
         "order_id": order_id,
         "store_name": store_name,
-        "overall_status": overall,
+        "overall_status": _ha_enum(overall),
         "overall_status_text": ENUMS["overall.status"].get(overall),
-        "step": step,
-        "step_text": ENUMS["tracking.step"].get(step),
+        "step": _ha_enum(step),
+        "step_text": ENUMS["tracking.step"].get(step)
+        or (ENUMS["tracking.step"].get("CANCELED") if step == "CANCELLED" else None),
         "active": step == "IN_PROGRESS",
         "delivered": step == "DELIVERED",
         "canceled": step in ("CANCELED", "CANCELLED"),
         "courier_name": courier_name,
         "courier_phone": courier_phone,
-        "courier_status": event.get("courierStatus"),
-        "courier_status_text": ENUMS["tracking.courierStatus"].get(event.get("courierStatus")),
+        "courier_status": _ha_enum(event.get("courierStatus")),
+        "courier_status_text": ENUMS["tracking.courierStatus"].get(
+            event.get("courierStatus")
+        ),
         "courier_message": courier_message,
         "chat_available": primary_courier.get("chatAvailable"),
         "courier_count": courier_count,
-        "partner_status": event.get("partnerStatus"),
-        "partner_status_text": ENUMS["tracking.partnerStatus"].get(event.get("partnerStatus")),
+        "partner_status": _ha_enum(event.get("partnerStatus")),
+        "partner_status_text": ENUMS["tracking.partnerStatus"].get(
+            event.get("partnerStatus")
+        ),
         "partner_message": partner.get("text"),
         "progress_percent": round(float(progress) * 100) if progress is not None else None,
         "is_late": lateness == "LATE",
@@ -1078,9 +1141,9 @@ def summarize_active_order(
         "eta_format": eta["format"],
         "eta_min": eta["min"],
         "eta_max": eta["max"],
-        "eta_minutes_left": eta["minutes_left"],
         "eta_text": eta["text"],
         "eta_former": eta["former"],
+        "original_eta": eta["former"] or eta["text"],
         "courier_lat": (courier_marker or {}).get("latitude"),
         "courier_lon": (courier_marker or {}).get("longitude"),
         "courier_heading": (courier_marker or {}).get("heading"),
@@ -1232,11 +1295,13 @@ def humanize_active_order(summary: dict[str, Any] | None) -> str:
     if summary.get("progress_percent") is not None:
         out.append(f"  progress: {summary['progress_percent']}%")
 
-    eta_fmt = summary.get("eta_format")
-    if eta_fmt == "countdown" and summary.get("eta_minutes_left") is not None:
-        out.append(f"  eta: {summary['eta_minutes_left']} min left")
-    elif eta_fmt == "timestamp":
-        out.append(f"  eta: {summary.get('eta_min')} – {summary.get('eta_max')}")
+    eta_min = summary.get("eta_min")
+    eta_max = summary.get("eta_max")
+    if eta_min is not None and eta_max is not None:
+        if eta_min == eta_max:
+            out.append(f"  eta: {eta_min} min left")
+        else:
+            out.append(f"  eta: {eta_min}–{eta_max} min left")
     elif summary.get("eta_text"):
         out.append(f"  eta: {summary['eta_text']}")
 
