@@ -47,25 +47,25 @@
       "overall_status": {
         "name": "Order status",
         "state": {
-          "SCHEDULED": "Scheduled",
-          "PREPARING": "Preparing",
-          "COURIER_ASSIGNED": "Courier assigned",
-          "COURIER_WAITING": "Courier waiting at store",
-          "AWAITING_PICKUP": "Awaiting pickup",
-          "ON_THE_WAY": "On the way",
-          "ARRIVING": "Arriving",
-          "DELIVERED": "Delivered",
-          "CANCELED": "Canceled",
-          "UNKNOWN": "Unknown"
+          "scheduled": "Scheduled",
+          "preparing": "Preparing",
+          "courier_assigned": "Courier assigned",
+          "courier_waiting": "Courier waiting at store",
+          "awaiting_pickup": "Awaiting pickup",
+          "on_the_way": "On the way",
+          "arriving": "Arriving",
+          "delivered": "Delivered",
+          "canceled": "Canceled",
+          "unknown": "Unknown"
         }
       },
       "step": {
         "name": "Stage",
         "state": {
-          "SCHEDULED": "Scheduled",
-          "IN_PROGRESS": "In progress",
-          "DELIVERED": "Delivered",
-          "CANCELED": "Canceled"
+          "scheduled": "Scheduled",
+          "in_progress": "In progress",
+          "delivered": "Delivered",
+          "canceled": "Canceled"
         }
       },
       "store_name": { "name": "Store" },
@@ -74,17 +74,17 @@
       "courier_status": {
         "name": "Courier status",
         "state": {
-          "ASSIGNED": "Assigned",
-          "WAITING": "Waiting at store",
-          "ON_THE_WAY": "On the way",
-          "ARRIVING": "Arriving"
+          "assigned": "Assigned",
+          "waiting": "Waiting at store",
+          "on_the_way": "On the way",
+          "arriving": "Arriving"
         }
       },
       "partner_status": {
         "name": "Store status",
         "state": {
-          "PREPARING": "Preparing",
-          "READY": "Ready"
+          "preparing": "Preparing",
+          "ready": "Ready"
         }
       },
       "progress_percent": { "name": "Progress" },

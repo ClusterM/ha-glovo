@@ -47,25 +47,25 @@
       "overall_status": {
         "name": "Статус заказа",
         "state": {
-          "SCHEDULED": "Запланирован",
-          "PREPARING": "Готовится",
-          "COURIER_ASSIGNED": "Курьер назначен",
-          "COURIER_WAITING": "Курьер ждёт в магазине",
-          "AWAITING_PICKUP": "Ожидает курьера",
-          "ON_THE_WAY": "В пути",
-          "ARRIVING": "Подъезжает",
-          "DELIVERED": "Доставлен",
-          "CANCELED": "Отменён",
-          "UNKNOWN": "Неизвестно"
+          "scheduled": "Запланирован",
+          "preparing": "Готовится",
+          "courier_assigned": "Курьер назначен",
+          "courier_waiting": "Курьер ждёт в магазине",
+          "awaiting_pickup": "Ожидает курьера",
+          "on_the_way": "В пути",
+          "arriving": "Подъезжает",
+          "delivered": "Доставлен",
+          "canceled": "Отменён",
+          "unknown": "Неизвестно"
         }
       },
       "step": {
         "name": "Этап",
         "state": {
-          "SCHEDULED": "Запланирован",
-          "IN_PROGRESS": "Выполняется",
-          "DELIVERED": "Доставлен",
-          "CANCELED": "Отменён"
+          "scheduled": "Запланирован",
+          "in_progress": "Выполняется",
+          "delivered": "Доставлен",
+          "canceled": "Отменён"
         }
       },
       "store_name": { "name": "Магазин" },
@@ -74,17 +74,17 @@
       "courier_status": {
         "name": "Статус курьера",
         "state": {
-          "ASSIGNED": "Назначен",
-          "WAITING": "Ждёт в магазине",
-          "ON_THE_WAY": "В пути",
-          "ARRIVING": "Подъезжает"
+          "assigned": "Назначен",
+          "waiting": "Ждёт в магазине",
+          "on_the_way": "В пути",
+          "arriving": "Подъезжает"
         }
       },
       "partner_status": {
         "name": "Статус магазина",
         "state": {
-          "PREPARING": "Готовит",
-          "READY": "Готово"
+          "preparing": "Готовит",
+          "ready": "Готово"
         }
       },
       "progress_percent": { "name": "Прогресс" },
