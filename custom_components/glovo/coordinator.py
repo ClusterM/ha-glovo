@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import timedelta
 from typing import Any
@@ -12,7 +13,13 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from . import glovo
-from .const import CONF_SCAN_INTERVAL, CONF_TOKEN, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_SCAN_INTERVAL,
+    CONF_TOKEN,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    FIXTURES_REL_PATH,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,26 +45,39 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
-        token_json = self.config_entry.data[CONF_TOKEN]
-        try:
-            summary, new_token = await self.hass.async_add_executor_job(
-                glovo.get_last_active_order_summary, token_json
+        fixtures_dir = self.hass.config.path(FIXTURES_REL_PATH)
+        if glovo.fixtures_available(fixtures_dir):
+            _LOGGER.warning(
+                "Serving Glovo data from local fixtures in %s (API disabled)",
+                fixtures_dir,
             )
-        except glovo.GlovoApiError as err:
-            if err.status in (401, 403):
-                raise ConfigEntryAuthFailed(
-                    "Glovo token rejected, re-authentication required"
-                ) from err
-            raise UpdateFailed(f"Glovo API error: {err}") from err
-        except RuntimeError as err:
-            # Raised when the refresh token is missing/invalid.
-            raise ConfigEntryAuthFailed(str(err)) from err
+            try:
+                summary = await self.hass.async_add_executor_job(
+                    glovo.get_last_active_order_summary_from_fixtures, fixtures_dir
+                )
+            except (OSError, json.JSONDecodeError, RuntimeError) as err:
+                raise UpdateFailed(f"Invalid Glovo fixture files: {err}") from err
+        else:
+            token_json = self.config_entry.data[CONF_TOKEN]
+            try:
+                summary, new_token = await self.hass.async_add_executor_job(
+                    glovo.get_last_active_order_summary, token_json
+                )
+            except glovo.GlovoApiError as err:
+                if err.status in (401, 403):
+                    raise ConfigEntryAuthFailed(
+                        "Glovo token rejected, re-authentication required"
+                    ) from err
+                raise UpdateFailed(f"Glovo API error: {err}") from err
+            except RuntimeError as err:
+                # Raised when the refresh token is missing/invalid.
+                raise ConfigEntryAuthFailed(str(err)) from err
 
-        if new_token != token_json:
-            self.hass.config_entries.async_update_entry(
-                self.config_entry,
-                data={**self.config_entry.data, CONF_TOKEN: new_token},
-            )
+            if new_token != token_json:
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry,
+                    data={**self.config_entry.data, CONF_TOKEN: new_token},
+                )
 
         self._apply_dynamic_interval(summary)
         return summary

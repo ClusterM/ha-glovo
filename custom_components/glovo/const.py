@@ -25,3 +25,8 @@ PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.DEVICE_TRACKER,
 ]
+
+# Temporary dev mode: when all fixture JSON files exist under this path
+# (relative to the HA config directory), the coordinator serves data from
+# them instead of calling the Glovo API. Remove the files to go live again.
+FIXTURES_REL_PATH = "projects/ha-glovo"

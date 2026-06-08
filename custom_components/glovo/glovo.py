@@ -1142,6 +1142,64 @@ def get_last_active_order_summary(
     return summary, token_json
 
 
+# --- Local fixture files (temporary dev / offline testing) ------------------
+
+FIXTURE_FILES: tuple[str, ...] = (
+    "orders-list.json",
+    "order-flow.json",
+    "order-info.json",
+    "order-tracking.json",
+)
+
+
+def fixtures_available(fixtures_dir: str | Path) -> bool:
+    """Return True when every expected fixture file is present."""
+    root = Path(fixtures_dir)
+    return all((root / name).is_file() for name in FIXTURE_FILES)
+
+
+def _load_fixture(fixtures_dir: Path, name: str) -> dict[str, Any]:
+    with (fixtures_dir / name).open(encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise RuntimeError(f"Fixture {name} must be a JSON object")
+    return data
+
+
+def get_last_active_order_summary_from_fixtures(
+    fixtures_dir: str | Path,
+    *,
+    include_details: bool = True,
+) -> dict[str, Any]:
+    """Build an order summary from local JSON dumps instead of the API.
+
+    Expects FIXTURE_FILES under ``fixtures_dir``. ``order-flow.json`` must
+    exist but is not consumed here (kept for parity with real API dumps).
+    """
+    root = Path(fixtures_dir)
+    orders = _load_fixture(root, "orders-list.json")
+    tracking = _load_fixture(root, "order-tracking.json")
+
+    active_order_ids = find_active_order_ids(orders)
+    order_count = len(active_order_ids)
+    if order_count == 0:
+        return empty_active_order_summary()
+
+    order_id = active_order_ids[0]
+    list_row = None
+    for row in orders.get("rows") or []:
+        if (row.get("data") or {}).get("orderId") == order_id:
+            list_row = row.get("data")
+            break
+
+    info = _load_fixture(root, "order-info.json") if include_details else None
+    summary = summarize_active_order(
+        tracking, order_id=order_id, info=info, list_row=list_row
+    )
+    summary["order_count"] = order_count
+    return summary
+
+
 def humanize_active_order(summary: dict[str, Any] | None) -> str:
     if not summary or summary.get("order_count") == 0:
         return "No active order."
