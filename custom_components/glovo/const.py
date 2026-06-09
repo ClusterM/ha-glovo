@@ -23,6 +23,13 @@ DEFAULT_SCAN_INTERVAL = 15
 MIN_SCAN_INTERVAL = 5
 MAX_SCAN_INTERVAL = 3600
 
+# Once an order leaves the active list, keep surfacing its final
+# (delivered/canceled) status for this long before falling back to "unknown".
+CACHE_TERMINAL_HOLD_SEC = 60
+
+# Overall-status values considered terminal for the grace-period cache.
+TERMINAL_OVERALL_STATUSES = ("delivered", "canceled")
+
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,

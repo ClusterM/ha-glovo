@@ -1151,9 +1151,56 @@ def summarize_active_order(
     }
 
 
+def _list_row_for(orders: dict[str, Any] | None, order_id: int | str) -> dict[str, Any] | None:
+    """Return the orders-list `data` row for order_id, if present."""
+    for row in (orders or {}).get("rows") or []:
+        if (row.get("data") or {}).get("orderId") == order_id:
+            return row.get("data")
+    return None
+
+
+def get_order_summary(
+    token_json: str,
+    order_id: int | str,
+    *,
+    orders: dict[str, Any] | None = None,
+    include_details: bool = True,
+    refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
+) -> tuple[dict[str, Any], str]:
+    """Build a summary for a specific order id, even if it is no longer active.
+
+    The tracking endpoint keeps returning a DELIVERED/CANCELED step after the
+    order leaves the active orders list, so this can be used to surface a final
+    status for a short grace period. `orders` may be passed to reuse an
+    orders-list response for store-name enrichment.
+
+    Returns (summary, updated_token_json).
+    """
+    list_row = _list_row_for(orders, order_id)
+
+    tracking, token_json = get_order_tracking(
+        token_json, order_id, refresh_margin_sec=refresh_margin_sec
+    )
+
+    info = None
+    if include_details:
+        try:
+            info, token_json = get_order(
+                token_json, order_id, refresh_margin_sec=refresh_margin_sec
+            )
+        except GlovoApiError:
+            info = None
+
+    summary = summarize_active_order(
+        tracking, order_id=order_id, info=info, list_row=list_row
+    )
+    return summary, token_json
+
+
 def get_last_active_order_summary(
     token_json: str,
     *,
+    fallback_order_id: int | str | None = None,
     include_details: bool = True,
     refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
 ) -> tuple[dict[str, Any], str]:
@@ -1167,6 +1214,12 @@ def get_last_active_order_summary(
     order_count=0. When several are active, order_count is the total and the
     remaining fields describe the first ACTIVE_ORDER row.
 
+    If no order is active but `fallback_order_id` is given, the summary is built
+    from that order's tracking instead (order_count=0). This lets callers keep
+    showing a just-delivered/canceled order for a grace period after it drops
+    out of the active list. On any API error for the fallback order, an empty
+    summary is returned.
+
     Returns (summary, updated_token_json).
     """
     orders, token_json = get_orders_list(
@@ -1174,16 +1227,25 @@ def get_last_active_order_summary(
     )
     active_order_ids = find_active_order_ids(orders)
     order_count = len(active_order_ids)
+
     if order_count == 0:
+        if fallback_order_id is not None:
+            try:
+                summary, token_json = get_order_summary(
+                    token_json,
+                    fallback_order_id,
+                    orders=orders,
+                    include_details=include_details,
+                    refresh_margin_sec=refresh_margin_sec,
+                )
+            except GlovoApiError:
+                return empty_active_order_summary(), token_json
+            summary["order_count"] = 0
+            return summary, token_json
         return empty_active_order_summary(), token_json
 
     order_id = active_order_ids[0]
-
-    list_row = None
-    for row in orders.get("rows") or []:
-        if (row.get("data") or {}).get("orderId") == order_id:
-            list_row = row.get("data")
-            break
+    list_row = _list_row_for(orders, order_id)
 
     tracking, token_json = get_order_tracking(
         token_json, order_id, refresh_margin_sec=refresh_margin_sec
@@ -1232,12 +1294,17 @@ def _load_fixture(fixtures_dir: Path, name: str) -> dict[str, Any]:
 def get_last_active_order_summary_from_fixtures(
     fixtures_dir: str | Path,
     *,
+    fallback_order_id: int | str | None = None,
     include_details: bool = True,
 ) -> dict[str, Any]:
     """Build an order summary from local JSON dumps instead of the API.
 
     Expects FIXTURE_FILES under ``fixtures_dir``. ``order-flow.json`` must
     exist but is not consumed here (kept for parity with real API dumps).
+
+    Mirrors get_last_active_order_summary(): when no order is active but
+    ``fallback_order_id`` is given, the summary is built from the tracking
+    fixture (order_count=0) so a just-delivered order can still be surfaced.
     """
     root = Path(fixtures_dir)
     orders = _load_fixture(root, "orders-list.json")
@@ -1245,15 +1312,19 @@ def get_last_active_order_summary_from_fixtures(
 
     active_order_ids = find_active_order_ids(orders)
     order_count = len(active_order_ids)
+
     if order_count == 0:
+        if fallback_order_id is not None:
+            info = _load_fixture(root, "order-info.json") if include_details else None
+            summary = summarize_active_order(
+                tracking, order_id=fallback_order_id, info=info
+            )
+            summary["order_count"] = 0
+            return summary
         return empty_active_order_summary()
 
     order_id = active_order_ids[0]
-    list_row = None
-    for row in orders.get("rows") or []:
-        if (row.get("data") or {}).get("orderId") == order_id:
-            list_row = row.get("data")
-            break
+    list_row = _list_row_for(orders, order_id)
 
     info = _load_fixture(root, "order-info.json") if include_details else None
     summary = summarize_active_order(

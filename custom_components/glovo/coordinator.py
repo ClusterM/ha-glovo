@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from datetime import timedelta
+from functools import partial
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -14,11 +16,13 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from . import glovo
 from .const import (
+    CACHE_TERMINAL_HOLD_SEC,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     FIXTURES_REL_PATH,
+    TERMINAL_OVERALL_STATUSES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +40,11 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._base_interval = timedelta(
             seconds=entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         )
+        # Grace-period cache: remember the last order we tracked so its final
+        # status keeps showing for CACHE_TERMINAL_HOLD_SEC after it leaves the
+        # active list, instead of immediately flipping to "unknown".
+        self._cached_order_id: int | str | None = None
+        self._terminal_since: float | None = None
         super().__init__(
             hass,
             _LOGGER,
@@ -45,6 +54,7 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
 
     async def _async_update_data(self) -> dict[str, Any]:
+        fallback_order_id = self._cached_order_id
         fixtures_dir = self.hass.config.path(FIXTURES_REL_PATH)
         if glovo.fixtures_available(fixtures_dir):
             _LOGGER.warning(
@@ -53,7 +63,11 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             )
             try:
                 summary = await self.hass.async_add_executor_job(
-                    glovo.get_last_active_order_summary_from_fixtures, fixtures_dir
+                    partial(
+                        glovo.get_last_active_order_summary_from_fixtures,
+                        fixtures_dir,
+                        fallback_order_id=fallback_order_id,
+                    )
                 )
             except (OSError, json.JSONDecodeError, RuntimeError) as err:
                 raise UpdateFailed(f"Invalid Glovo fixture files: {err}") from err
@@ -61,7 +75,11 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             token_json = self.config_entry.data[CONF_TOKEN]
             try:
                 summary, new_token = await self.hass.async_add_executor_job(
-                    glovo.get_last_active_order_summary, token_json
+                    partial(
+                        glovo.get_last_active_order_summary,
+                        token_json,
+                        fallback_order_id=fallback_order_id,
+                    )
                 )
             except glovo.GlovoApiError as err:
                 if err.status in (401, 403):
@@ -79,8 +97,56 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     data={**self.config_entry.data, CONF_TOKEN: new_token},
                 )
 
+        summary = self._apply_terminal_cache(summary)
         self._apply_dynamic_interval(summary)
         return summary
+
+    def _apply_terminal_cache(self, summary: dict[str, Any]) -> dict[str, Any]:
+        """Hold a just-finished order's status for a short grace period.
+
+        Glovo drops delivered/canceled orders from the active list immediately,
+        so without this the status would jump straight to "unknown". We remember
+        the order id and keep surfacing its final state until it has been
+        terminal for CACHE_TERMINAL_HOLD_SEC, then forget it.
+        """
+        order_id = summary.get("order_id")
+        status = summary.get("overall_status")
+        order_count = summary.get("order_count") or 0
+        is_terminal = status in TERMINAL_OVERALL_STATUSES
+        now = time.monotonic()
+
+        if order_count > 0:
+            # An order is active right now: track it and disarm the hold timer.
+            self._cached_order_id = order_id
+            self._terminal_since = None
+            return summary
+
+        # No active order. If the summary describes our cached order (fallback
+        # tracking succeeded), decide whether to keep showing it.
+        if (
+            self._cached_order_id is not None
+            and order_id == self._cached_order_id
+            and status is not None
+        ):
+            if is_terminal:
+                if self._terminal_since is None:
+                    self._terminal_since = now
+                elif now - self._terminal_since >= CACHE_TERMINAL_HOLD_SEC:
+                    self._forget_cached_order()
+                    return glovo.empty_active_order_summary()
+            else:
+                # Still not terminal (rare): keep showing without arming timer.
+                self._terminal_since = None
+            return summary
+
+        # Nothing active and no usable cached order: report "no order".
+        self._forget_cached_order()
+        return glovo.empty_active_order_summary()
+
+    def _forget_cached_order(self) -> None:
+        """Clear the grace-period cache."""
+        self._cached_order_id = None
+        self._terminal_since = None
 
     def _apply_dynamic_interval(self, summary: dict[str, Any]) -> None:
         """Use the API-recommended poll interval while an order is active."""
