@@ -137,6 +137,89 @@ automation:
 
 Replace `sensor.glovo_order_status` with your entity id (Settings → Entities).
 
+### Spoken summary template
+
+A Jinja2 template that turns the current order state into a short human-readable sentence. It works well as a **voice assistant response** (e.g. answering "Where is my order?") or as a notification body. Adjust the entity ids to match yours.
+
+```jinja
+{% set status = states('sensor.glovo_order_status') %}
+{%- if status == 'unknown' -%}
+There are no active orders right now.
+{%- elif status == 'scheduled' -%}
+The order from {{ states('sensor.glovo_store') }} is scheduled.
+{%- elif status == 'preparing' -%}
+The order from {{ states('sensor.glovo_store') }} is being prepared.
+{%- elif status == 'courier_assigned' -%}
+The order from {{ states('sensor.glovo_store') }} is being prepared, courier {{ states('sensor.glovo_courier_name') }} is assigned.
+{%- elif status == 'courier_waiting' -%}
+Courier {{ states('sensor.glovo_courier_name') }} is waiting for the order at the store.
+{%- elif status == 'awaiting_pickup' -%}
+The {{ states('sensor.glovo_store') }} store is waiting for courier {{ states('sensor.glovo_courier_name') }}.
+{%- elif status == 'on_the_way' -%}
+Courier {{ states('sensor.glovo_courier_name') }} is on the way to you.
+{%- elif status == 'arriving' -%}
+Courier {{ states('sensor.glovo_courier_name') }} is almost here.
+{%- elif status == 'delivered' -%}
+The order from {{ states('sensor.glovo_store') }} has been delivered.
+{%- elif status == 'canceled' -%}
+The order was canceled.
+{%- else -%}
+No idea what is going on with this order.
+{%- endif -%}
+
+{% if states('sensor.glovo_eta_min') != 'unknown' %}
+{%- if states('binary_sensor.glovo_late') == 'on' %} It is running late.{% endif -%}
+{%- if states('sensor.glovo_eta_min') == states('sensor.glovo_eta_max') %}
+About {{ states('sensor.glovo_eta_min') }} min left.
+{% else %}
+About {{ states('sensor.glovo_eta_min') }}–{{ states('sensor.glovo_eta_max') }} min left.
+{%- endif -%}
+{%- endif -%}
+```
+
+<details>
+<summary>Russian variant (uses the <a href="https://github.com/AlexxIT/MorphNumbers">MorphNumbers</a> integration for number agreement)</summary>
+
+> Requires the [MorphNumbers](https://github.com/AlexxIT/MorphNumbers) integration installed for the `format(morph=…)` filter.
+
+```jinja
+{% set status = states('sensor.glovo_order_status') %}
+{%- if status == 'unknown' -%}
+Похоже, что сейчас нет активных заказов.
+{%- elif status == 'scheduled' -%}
+Заказ из {{ states('sensor.glovo_store') }} запланирован.
+{%- elif status == 'preparing' -%}
+Заказ из {{ states('sensor.glovo_store') }} готовится.
+{%- elif status == 'courier_assigned' -%}
+Заказ из {{ states('sensor.glovo_store') }} собирается, назначен курьер {{ states('sensor.glovo_courier_name') }}.
+{%- elif status == 'courier_waiting' -%}
+Курьер {{ states('sensor.glovo_courier_name') }} ждёт заказа в магазине.
+{%- elif status == 'awaiting_pickup' -%}
+Магазин {{ states('sensor.glovo_store') }} ожидает курьера {{ states('sensor.glovo_courier_name') }}.
+{%- elif status == 'on_the_way' -%}
+Курьер {{ states('sensor.glovo_courier_name') }} в пути к вам.
+{%- elif status == 'arriving' -%}
+Курьер {{ states('sensor.glovo_courier_name') }} уже совсем рядом.
+{%- elif status == 'delivered' -%}
+Заказ из {{ states('sensor.glovo_store') }} доставлен.
+{%- elif status == 'canceled' -%}
+Заказ отменён.
+{%- else -%}
+Хрен его знает, что с этим заказом.
+{%- endif -%}
+
+{% if states('sensor.glovo_eta_min') != 'unknown' %}
+{%- if states('binary_sensor.glovo_late') == 'on' %} Задерживается.{% endif -%}
+{%- if states('sensor.glovo_eta_min') == states('sensor.glovo_eta_max') %}
+{{ states('sensor.glovo_eta_min')|format(morph=['Осталась','Осталось','Осталось'], as_text=None) }} примерно {{ states('sensor.glovo_eta_min')|format(morph='минута') }}.
+{% else %}
+Осталось примерно {{ (states('sensor.glovo_eta_min')|format(morph='минута')).split()[:-1]|join(' ') }} - {{ states('sensor.glovo_eta_max')|format(morph='минута') }}.
+{%- endif -%}
+{%- endif -%}
+```
+
+</details>
+
 ## How polling works
 
 The integration calls the Glovo customer API and builds a flat summary of the most recent active order. While an order is active, the API returns a recommended polling interval (`pollingIntervalMillis`), and the integration follows it for near-real-time courier updates. When no order is active, it falls back to the interval you configured.
