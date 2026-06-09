@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "貼上來自 glovoapp.com 的重新整理權杖（localStorage 鍵 `glovo_refresh_token`）。",
+        "data": {
+          "refresh_token": "重新整理權杖",
+          "scan_interval": "更新間隔（秒）"
+        }
+      },
+      "reauth_confirm": {
+        "title": "重新驗證 Glovo",
+        "description": "已儲存的權杖遭拒。請貼上來自 glovoapp.com 的新重新整理權杖。",
+        "data": {
+          "refresh_token": "重新整理權杖"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "重新整理權杖無效。",
+      "cannot_connect": "無法連線至 Glovo。"
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo 已設定。",
+      "reauth_successful": "重新驗證成功。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo 選項",
+        "description": "將權杖欄位留空以保留目前的權杖。",
+        "data": {
+          "scan_interval": "更新間隔（秒）",
+          "refresh_token": "新的重新整理權杖（選填）"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "重新整理權杖無效。",
+      "cannot_connect": "無法連線至 Glovo。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "訂單狀態",
+        "state": {
+          "scheduled": "已預約",
+          "preparing": "準備中",
+          "courier_assigned": "準備中，已指派外送員",
+          "courier_waiting": "外送員在店內等候",
+          "awaiting_pickup": "店家等候外送員",
+          "on_the_way": "外送員正前往你處",
+          "arriving": "外送員即將抵達",
+          "delivered": "已送達",
+          "canceled": "已取消",
+          "unknown": "未知"
+        }
+      },
+      "step": {
+        "name": "階段",
+        "state": {
+          "scheduled": "已預約",
+          "in_progress": "進行中",
+          "delivered": "已送達",
+          "canceled": "已取消"
+        }
+      },
+      "store_name": { "name": "店家" },
+      "order_count": { "name": "進行中的訂單" },
+      "courier_name": { "name": "外送員姓名" },
+      "courier_status": {
+        "name": "外送員狀態",
+        "state": {
+          "assigned": "已指派",
+          "waiting": "在店內等候",
+          "on_the_way": "途中",
+          "arriving": "即將抵達"
+        }
+      },
+      "partner_status": {
+        "name": "店家狀態",
+        "state": {
+          "preparing": "準備中",
+          "ready": "已就緒"
+        }
+      },
+      "progress_percent": { "name": "進度" },
+      "eta_min": { "name": "抵達最短" },
+      "eta_max": { "name": "抵達最長" },
+      "original_eta": { "name": "原始抵達時間" },
+      "poll_interval_sec": { "name": "建議輪詢間隔" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "進行中的訂單" },
+      "is_late": { "name": "延遲" },
+      "chat_available": { "name": "聊天可用" }
+    },
+    "device_tracker": {
+      "courier": { "name": "外送員位置" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "訂單狀態變為：已預約",
+      "preparing": "訂單狀態變為：準備中",
+      "courier_assigned": "訂單狀態變為：準備中，已指派外送員",
+      "courier_waiting": "訂單狀態變為：外送員在店內等候",
+      "awaiting_pickup": "訂單狀態變為：店家等候外送員",
+      "on_the_way": "訂單狀態變為：外送員正前往你處",
+      "arriving": "訂單狀態變為：外送員即將抵達",
+      "delivered": "訂單狀態變為：已送達",
+      "canceled": "訂單狀態變為：已取消"
+    }
+  }
+}

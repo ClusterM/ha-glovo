@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Kleebi värskendustoken saidilt glovoapp.com (localStorage'i võti `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Värskendustoken",
+          "scan_interval": "Värskendamise intervall (sekundites)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Autendi Glovo uuesti",
+        "description": "Salvestatud token lükati tagasi. Kleebi uus värskendustoken saidilt glovoapp.com.",
+        "data": {
+          "refresh_token": "Värskendustoken"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Vigane värskendustoken.",
+      "cannot_connect": "Glovoga ühenduse loomine ebaõnnestus."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo on juba seadistatud.",
+      "reauth_successful": "Taasautentimine õnnestus."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo valikud",
+        "description": "Jäta tokeni väli tühjaks, et säilitada praegune.",
+        "data": {
+          "scan_interval": "Värskendamise intervall (sekundites)",
+          "refresh_token": "Uus värskendustoken (valikuline)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Vigane värskendustoken.",
+      "cannot_connect": "Glovoga ühenduse loomine ebaõnnestus."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Tellimuse olek",
+        "state": {
+          "scheduled": "Ajastatud",
+          "preparing": "Valmistatakse",
+          "courier_assigned": "Valmistatakse, kuller määratud",
+          "courier_waiting": "Kuller ootab poes",
+          "awaiting_pickup": "Pood ootab kullerit",
+          "on_the_way": "Kuller on teel sinu juurde",
+          "arriving": "Kuller jõuab varsti kohale",
+          "delivered": "Kohale toimetatud",
+          "canceled": "Tühistatud",
+          "unknown": "Teadmata"
+        }
+      },
+      "step": {
+        "name": "Etapp",
+        "state": {
+          "scheduled": "Ajastatud",
+          "in_progress": "Pooleli",
+          "delivered": "Kohale toimetatud",
+          "canceled": "Tühistatud"
+        }
+      },
+      "store_name": { "name": "Pood" },
+      "order_count": { "name": "Aktiivsed tellimused" },
+      "courier_name": { "name": "Kulleri nimi" },
+      "courier_status": {
+        "name": "Kulleri olek",
+        "state": {
+          "assigned": "Määratud",
+          "waiting": "Ootab poes",
+          "on_the_way": "Teel",
+          "arriving": "Saabub"
+        }
+      },
+      "partner_status": {
+        "name": "Poe olek",
+        "state": {
+          "preparing": "Valmistab",
+          "ready": "Valmis"
+        }
+      },
+      "progress_percent": { "name": "Edenemine" },
+      "eta_min": { "name": "Saabumine min." },
+      "eta_max": { "name": "Saabumine max." },
+      "original_eta": { "name": "Algne saabumisaeg" },
+      "poll_interval_sec": { "name": "Soovitatav pärimisintervall" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktiivne tellimus" },
+      "is_late": { "name": "Hilineb" },
+      "chat_available": { "name": "Vestlus saadaval" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Kulleri asukoht" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Tellimuse olekuks saab: ajastatud",
+      "preparing": "Tellimuse olekuks saab: valmistatakse",
+      "courier_assigned": "Tellimuse olekuks saab: valmistatakse, kuller määratud",
+      "courier_waiting": "Tellimuse olekuks saab: kuller ootab poes",
+      "awaiting_pickup": "Tellimuse olekuks saab: pood ootab kullerit",
+      "on_the_way": "Tellimuse olekuks saab: kuller on teel sinu juurde",
+      "arriving": "Tellimuse olekuks saab: kuller jõuab varsti kohale",
+      "delivered": "Tellimuse olekuks saab: kohale toimetatud",
+      "canceled": "Tellimuse olekuks saab: tühistatud"
+    }
+  }
+}

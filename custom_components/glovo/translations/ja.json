@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "glovoapp.com のリフレッシュトークンを貼り付けてください（localStorage キー `glovo_refresh_token`）。",
+        "data": {
+          "refresh_token": "リフレッシュトークン",
+          "scan_interval": "更新間隔（秒）"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo を再認証",
+        "description": "保存されたトークンが拒否されました。glovoapp.com から新しいリフレッシュトークンを貼り付けてください。",
+        "data": {
+          "refresh_token": "リフレッシュトークン"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "リフレッシュトークンが無効です。",
+      "cannot_connect": "Glovo に接続できませんでした。"
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo はすでに設定されています。",
+      "reauth_successful": "再認証に成功しました。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo オプション",
+        "description": "現在のトークンを保持するには、トークン欄を空のままにしてください。",
+        "data": {
+          "scan_interval": "更新間隔（秒）",
+          "refresh_token": "新しいリフレッシュトークン（任意）"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "リフレッシュトークンが無効です。",
+      "cannot_connect": "Glovo に接続できませんでした。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "注文ステータス",
+        "state": {
+          "scheduled": "予約済み",
+          "preparing": "準備中",
+          "courier_assigned": "準備中、配達員が割り当て済み",
+          "courier_waiting": "配達員が店舗で待機中",
+          "awaiting_pickup": "店舗が配達員を待機中",
+          "on_the_way": "配達員が向かっています",
+          "arriving": "配達員がまもなく到着",
+          "delivered": "配達済み",
+          "canceled": "キャンセル済み",
+          "unknown": "不明"
+        }
+      },
+      "step": {
+        "name": "段階",
+        "state": {
+          "scheduled": "予約済み",
+          "in_progress": "進行中",
+          "delivered": "配達済み",
+          "canceled": "キャンセル済み"
+        }
+      },
+      "store_name": { "name": "店舗" },
+      "order_count": { "name": "アクティブな注文" },
+      "courier_name": { "name": "配達員名" },
+      "courier_status": {
+        "name": "配達員ステータス",
+        "state": {
+          "assigned": "割り当て済み",
+          "waiting": "店舗で待機中",
+          "on_the_way": "移動中",
+          "arriving": "到着中"
+        }
+      },
+      "partner_status": {
+        "name": "店舗ステータス",
+        "state": {
+          "preparing": "準備中",
+          "ready": "準備完了"
+        }
+      },
+      "progress_percent": { "name": "進捗" },
+      "eta_min": { "name": "到着 最小" },
+      "eta_max": { "name": "到着 最大" },
+      "original_eta": { "name": "当初の到着予定時刻" },
+      "poll_interval_sec": { "name": "推奨ポーリング間隔" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "アクティブな注文" },
+      "is_late": { "name": "遅延" },
+      "chat_available": { "name": "チャット利用可能" }
+    },
+    "device_tracker": {
+      "courier": { "name": "配達員の位置" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "注文ステータスが「予約済み」になったとき",
+      "preparing": "注文ステータスが「準備中」になったとき",
+      "courier_assigned": "注文ステータスが「準備中、配達員が割り当て済み」になったとき",
+      "courier_waiting": "注文ステータスが「配達員が店舗で待機中」になったとき",
+      "awaiting_pickup": "注文ステータスが「店舗が配達員を待機中」になったとき",
+      "on_the_way": "注文ステータスが「配達員が向かっています」になったとき",
+      "arriving": "注文ステータスが「配達員がまもなく到着」になったとき",
+      "delivered": "注文ステータスが「配達済み」になったとき",
+      "canceled": "注文ステータスが「キャンセル済み」になったとき"
+    }
+  }
+}

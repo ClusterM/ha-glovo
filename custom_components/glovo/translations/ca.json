@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Enganxa el testimoni d'actualització de glovoapp.com (clau de localStorage `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Testimoni d'actualització",
+          "scan_interval": "Interval d'actualització (segons)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Torna a autenticar Glovo",
+        "description": "El testimoni desat ha estat rebutjat. Enganxa un nou testimoni d'actualització de glovoapp.com.",
+        "data": {
+          "refresh_token": "Testimoni d'actualització"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Testimoni d'actualització no vàlid.",
+      "cannot_connect": "No s'ha pogut connectar amb Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo ja està configurat.",
+      "reauth_successful": "La reautenticació s'ha realitzat correctament."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opcions de Glovo",
+        "description": "Deixa el camp del testimoni buit per conservar l'actual.",
+        "data": {
+          "scan_interval": "Interval d'actualització (segons)",
+          "refresh_token": "Nou testimoni d'actualització (opcional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Testimoni d'actualització no vàlid.",
+      "cannot_connect": "No s'ha pogut connectar amb Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Estat de la comanda",
+        "state": {
+          "scheduled": "Programada",
+          "preparing": "En preparació",
+          "courier_assigned": "En preparació, missatger assignat",
+          "courier_waiting": "El missatger espera a la botiga",
+          "awaiting_pickup": "La botiga espera el missatger",
+          "on_the_way": "El missatger ve cap a tu",
+          "arriving": "El missatger està arribant",
+          "delivered": "Lliurada",
+          "canceled": "Cancel·lada",
+          "unknown": "Desconegut"
+        }
+      },
+      "step": {
+        "name": "Etapa",
+        "state": {
+          "scheduled": "Programada",
+          "in_progress": "En curs",
+          "delivered": "Lliurada",
+          "canceled": "Cancel·lada"
+        }
+      },
+      "store_name": { "name": "Botiga" },
+      "order_count": { "name": "Comandes actives" },
+      "courier_name": { "name": "Nom del missatger" },
+      "courier_status": {
+        "name": "Estat del missatger",
+        "state": {
+          "assigned": "Assignat",
+          "waiting": "Espera a la botiga",
+          "on_the_way": "En camí",
+          "arriving": "Arribant"
+        }
+      },
+      "partner_status": {
+        "name": "Estat de la botiga",
+        "state": {
+          "preparing": "Preparant",
+          "ready": "Llest"
+        }
+      },
+      "progress_percent": { "name": "Progrés" },
+      "eta_min": { "name": "Arribada mín." },
+      "eta_max": { "name": "Arribada màx." },
+      "original_eta": { "name": "Hora d'arribada original" },
+      "poll_interval_sec": { "name": "Interval de sondeig recomanat" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Comanda activa" },
+      "is_late": { "name": "Amb retard" },
+      "chat_available": { "name": "Xat disponible" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Ubicació del missatger" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "L'estat de la comanda passa a: programada",
+      "preparing": "L'estat de la comanda passa a: en preparació",
+      "courier_assigned": "L'estat de la comanda passa a: en preparació, missatger assignat",
+      "courier_waiting": "L'estat de la comanda passa a: el missatger espera a la botiga",
+      "awaiting_pickup": "L'estat de la comanda passa a: la botiga espera el missatger",
+      "on_the_way": "L'estat de la comanda passa a: el missatger ve cap a tu",
+      "arriving": "L'estat de la comanda passa a: el missatger està arribant",
+      "delivered": "L'estat de la comanda passa a: lliurada",
+      "canceled": "L'estat de la comanda passa a: cancel·lada"
+    }
+  }
+}

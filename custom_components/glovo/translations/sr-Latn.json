@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Nalepi token za osvežavanje sa glovoapp.com (ključ u localStorage `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Token za osvežavanje",
+          "scan_interval": "Interval ažuriranja (sekunde)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Ponovo autentifikuj Glovo",
+        "description": "Sačuvani token je odbijen. Nalepi novi token za osvežavanje sa glovoapp.com.",
+        "data": {
+          "refresh_token": "Token za osvežavanje"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Nevažeći token za osvežavanje.",
+      "cannot_connect": "Povezivanje sa Glovom nije uspelo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo je već konfigurisan.",
+      "reauth_successful": "Ponovna autentifikacija je uspela."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo opcije",
+        "description": "Ostavi polje tokena prazno da zadržiš trenutni.",
+        "data": {
+          "scan_interval": "Interval ažuriranja (sekunde)",
+          "refresh_token": "Novi token za osvežavanje (opciono)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Nevažeći token za osvežavanje.",
+      "cannot_connect": "Povezivanje sa Glovom nije uspelo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Status porudžbine",
+        "state": {
+          "scheduled": "Zakazano",
+          "preparing": "Priprema se",
+          "courier_assigned": "Priprema se, kurir dodeljen",
+          "courier_waiting": "Kurir čeka u prodavnici",
+          "awaiting_pickup": "Prodavnica čeka kurira",
+          "on_the_way": "Kurir je na putu ka tebi",
+          "arriving": "Kurir samo što nije stigao",
+          "delivered": "Isporučeno",
+          "canceled": "Otkazano",
+          "unknown": "Nepoznato"
+        }
+      },
+      "step": {
+        "name": "Faza",
+        "state": {
+          "scheduled": "Zakazano",
+          "in_progress": "U toku",
+          "delivered": "Isporučeno",
+          "canceled": "Otkazano"
+        }
+      },
+      "store_name": { "name": "Prodavnica" },
+      "order_count": { "name": "Aktivne porudžbine" },
+      "courier_name": { "name": "Ime kurira" },
+      "courier_status": {
+        "name": "Status kurira",
+        "state": {
+          "assigned": "Dodeljen",
+          "waiting": "Čeka u prodavnici",
+          "on_the_way": "Na putu",
+          "arriving": "Stiže"
+        }
+      },
+      "partner_status": {
+        "name": "Status prodavnice",
+        "state": {
+          "preparing": "Priprema",
+          "ready": "Spremno"
+        }
+      },
+      "progress_percent": { "name": "Napredak" },
+      "eta_min": { "name": "Dolazak min." },
+      "eta_max": { "name": "Dolazak maks." },
+      "original_eta": { "name": "Prvobitno vreme dolaska" },
+      "poll_interval_sec": { "name": "Preporučeni interval ispitivanja" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktivna porudžbina" },
+      "is_late": { "name": "Kasni" },
+      "chat_available": { "name": "Ćaskanje dostupno" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Lokacija kurira" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Status porudžbine postaje: zakazano",
+      "preparing": "Status porudžbine postaje: priprema se",
+      "courier_assigned": "Status porudžbine postaje: priprema se, kurir dodeljen",
+      "courier_waiting": "Status porudžbine postaje: kurir čeka u prodavnici",
+      "awaiting_pickup": "Status porudžbine postaje: prodavnica čeka kurira",
+      "on_the_way": "Status porudžbine postaje: kurir je na putu ka tebi",
+      "arriving": "Status porudžbine postaje: kurir samo što nije stigao",
+      "delivered": "Status porudžbine postaje: isporučeno",
+      "canceled": "Status porudžbine postaje: otkazano"
+    }
+  }
+}

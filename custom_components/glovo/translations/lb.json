@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Setz den Refresh-Token vu glovoapp.com an (localStorage-Schlëssel `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Refresh-Token",
+          "scan_interval": "Aktualiséierungsintervall (Sekonnen)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo nei authentifizéieren",
+        "description": "De gespäicherten Token gouf ofgeleent. Setz en neie Refresh-Token vu glovoapp.com an.",
+        "data": {
+          "refresh_token": "Refresh-Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ongültege Refresh-Token.",
+      "cannot_connect": "Verbindung mat Glovo feelgeschloen."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo ass scho konfiguréiert.",
+      "reauth_successful": "Nei Authentifizéierung erfollegräich."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo-Optiounen",
+        "description": "Loosst d'Tokenfeld eidel fir den aktuellen ze behalen.",
+        "data": {
+          "scan_interval": "Aktualiséierungsintervall (Sekonnen)",
+          "refresh_token": "Neie Refresh-Token (fakultativ)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ongültege Refresh-Token.",
+      "cannot_connect": "Verbindung mat Glovo feelgeschloen."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Bestellungsstatus",
+        "state": {
+          "scheduled": "Geplangt",
+          "preparing": "Gëtt virbereet",
+          "courier_assigned": "Gëtt virbereet, Coursier zougewisen",
+          "courier_waiting": "Coursier waart am Buttek",
+          "awaiting_pickup": "Buttek waart op de Coursier",
+          "on_the_way": "Coursier ass ënnerwee bei dech",
+          "arriving": "Coursier kënnt gläich un",
+          "delivered": "Geliwwert",
+          "canceled": "Annuléiert",
+          "unknown": "Onbekannt"
+        }
+      },
+      "step": {
+        "name": "Phase",
+        "state": {
+          "scheduled": "Geplangt",
+          "in_progress": "Am Gaang",
+          "delivered": "Geliwwert",
+          "canceled": "Annuléiert"
+        }
+      },
+      "store_name": { "name": "Buttek" },
+      "order_count": { "name": "Aktiv Bestellungen" },
+      "courier_name": { "name": "Numm vum Coursier" },
+      "courier_status": {
+        "name": "Coursierstatus",
+        "state": {
+          "assigned": "Zougewisen",
+          "waiting": "Waart am Buttek",
+          "on_the_way": "Ënnerwee",
+          "arriving": "Kënnt un"
+        }
+      },
+      "partner_status": {
+        "name": "Buttekstatus",
+        "state": {
+          "preparing": "Bereet vir",
+          "ready": "Fäerdeg"
+        }
+      },
+      "progress_percent": { "name": "Fortschrëtt" },
+      "eta_min": { "name": "Arrivée min." },
+      "eta_max": { "name": "Arrivée max." },
+      "original_eta": { "name": "Ursprénglech Arrivéeszäit" },
+      "poll_interval_sec": { "name": "Recommandéiert Offrointervall" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktiv Bestellung" },
+      "is_late": { "name": "Verspéit" },
+      "chat_available": { "name": "Chat verfügbar" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Coursier-Standuert" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Bestellungsstatus gëtt: geplangt",
+      "preparing": "Bestellungsstatus gëtt: gëtt virbereet",
+      "courier_assigned": "Bestellungsstatus gëtt: gëtt virbereet, Coursier zougewisen",
+      "courier_waiting": "Bestellungsstatus gëtt: Coursier waart am Buttek",
+      "awaiting_pickup": "Bestellungsstatus gëtt: Buttek waart op de Coursier",
+      "on_the_way": "Bestellungsstatus gëtt: Coursier ass ënnerwee bei dech",
+      "arriving": "Bestellungsstatus gëtt: Coursier kënnt gläich un",
+      "delivered": "Bestellungsstatus gëtt: geliwwert",
+      "canceled": "Bestellungsstatus gëtt: annuléiert"
+    }
+  }
+}

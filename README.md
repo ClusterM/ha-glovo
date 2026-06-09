@@ -12,7 +12,7 @@ Home Assistant custom integration for the [Glovo](https://glovoapp.com/) deliver
 - **Token auto-refresh** — you enter a refresh token once; the integration keeps the short-lived access token fresh and persists it across restarts
 - **Re-authentication flow** — if the token is ever rejected, Home Assistant prompts you for a new one
 - **Options flow** — change the update interval (and refresh token) without removing the integration
-- **Localized** — English and Russian translations
+- **Localized** — translations for all Home Assistant UI languages (48 locales)
 - **Device triggers** — one automation trigger per order status (pick from the Glovo device in the UI)
 
 ## Installation

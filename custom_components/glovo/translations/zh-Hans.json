@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "粘贴来自 glovoapp.com 的刷新令牌（localStorage 键 `glovo_refresh_token`）。",
+        "data": {
+          "refresh_token": "刷新令牌",
+          "scan_interval": "更新间隔（秒）"
+        }
+      },
+      "reauth_confirm": {
+        "title": "重新认证 Glovo",
+        "description": "已保存的令牌被拒绝。请粘贴来自 glovoapp.com 的新刷新令牌。",
+        "data": {
+          "refresh_token": "刷新令牌"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "刷新令牌无效。",
+      "cannot_connect": "无法连接到 Glovo。"
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo 已配置。",
+      "reauth_successful": "重新认证成功。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo 选项",
+        "description": "将令牌字段留空以保留当前令牌。",
+        "data": {
+          "scan_interval": "更新间隔（秒）",
+          "refresh_token": "新的刷新令牌（可选）"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "刷新令牌无效。",
+      "cannot_connect": "无法连接到 Glovo。"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "订单状态",
+        "state": {
+          "scheduled": "已预约",
+          "preparing": "准备中",
+          "courier_assigned": "准备中，已分配骑手",
+          "courier_waiting": "骑手在店内等待",
+          "awaiting_pickup": "店家等待骑手",
+          "on_the_way": "骑手正在前往你处",
+          "arriving": "骑手即将到达",
+          "delivered": "已送达",
+          "canceled": "已取消",
+          "unknown": "未知"
+        }
+      },
+      "step": {
+        "name": "阶段",
+        "state": {
+          "scheduled": "已预约",
+          "in_progress": "进行中",
+          "delivered": "已送达",
+          "canceled": "已取消"
+        }
+      },
+      "store_name": { "name": "店铺" },
+      "order_count": { "name": "活动订单" },
+      "courier_name": { "name": "骑手姓名" },
+      "courier_status": {
+        "name": "骑手状态",
+        "state": {
+          "assigned": "已分配",
+          "waiting": "在店内等待",
+          "on_the_way": "途中",
+          "arriving": "即将到达"
+        }
+      },
+      "partner_status": {
+        "name": "店家状态",
+        "state": {
+          "preparing": "准备中",
+          "ready": "已就绪"
+        }
+      },
+      "progress_percent": { "name": "进度" },
+      "eta_min": { "name": "到达最短" },
+      "eta_max": { "name": "到达最长" },
+      "original_eta": { "name": "原始到达时间" },
+      "poll_interval_sec": { "name": "建议轮询间隔" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "活动订单" },
+      "is_late": { "name": "延迟" },
+      "chat_available": { "name": "聊天可用" }
+    },
+    "device_tracker": {
+      "courier": { "name": "骑手位置" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "订单状态变为：已预约",
+      "preparing": "订单状态变为：准备中",
+      "courier_assigned": "订单状态变为：准备中，已分配骑手",
+      "courier_waiting": "订单状态变为：骑手在店内等待",
+      "awaiting_pickup": "订单状态变为：店家等待骑手",
+      "on_the_way": "订单状态变为：骑手正在前往你处",
+      "arriving": "订单状态变为：骑手即将到达",
+      "delivered": "订单状态变为：已送达",
+      "canceled": "订单状态变为：已取消"
+    }
+  }
+}

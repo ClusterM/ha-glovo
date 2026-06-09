@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "glovoapp.com의 리프레시 토큰을 붙여넣으세요 (localStorage 키 `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "리프레시 토큰",
+          "scan_interval": "업데이트 간격 (초)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo 재인증",
+        "description": "저장된 토큰이 거부되었습니다. glovoapp.com에서 새 리프레시 토큰을 붙여넣으세요.",
+        "data": {
+          "refresh_token": "리프레시 토큰"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "리프레시 토큰이 잘못되었습니다.",
+      "cannot_connect": "Glovo에 연결하지 못했습니다."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo가 이미 구성되어 있습니다.",
+      "reauth_successful": "재인증에 성공했습니다."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo 옵션",
+        "description": "현재 토큰을 유지하려면 토큰 필드를 비워 두세요.",
+        "data": {
+          "scan_interval": "업데이트 간격 (초)",
+          "refresh_token": "새 리프레시 토큰 (선택 사항)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "리프레시 토큰이 잘못되었습니다.",
+      "cannot_connect": "Glovo에 연결하지 못했습니다."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "주문 상태",
+        "state": {
+          "scheduled": "예약됨",
+          "preparing": "준비 중",
+          "courier_assigned": "준비 중, 배달원 배정됨",
+          "courier_waiting": "배달원이 매장에서 대기 중",
+          "awaiting_pickup": "매장이 배달원을 기다리는 중",
+          "on_the_way": "배달원이 당신에게 가는 중",
+          "arriving": "배달원이 곧 도착",
+          "delivered": "배달 완료",
+          "canceled": "취소됨",
+          "unknown": "알 수 없음"
+        }
+      },
+      "step": {
+        "name": "단계",
+        "state": {
+          "scheduled": "예약됨",
+          "in_progress": "진행 중",
+          "delivered": "배달 완료",
+          "canceled": "취소됨"
+        }
+      },
+      "store_name": { "name": "매장" },
+      "order_count": { "name": "활성 주문" },
+      "courier_name": { "name": "배달원 이름" },
+      "courier_status": {
+        "name": "배달원 상태",
+        "state": {
+          "assigned": "배정됨",
+          "waiting": "매장에서 대기 중",
+          "on_the_way": "이동 중",
+          "arriving": "도착 중"
+        }
+      },
+      "partner_status": {
+        "name": "매장 상태",
+        "state": {
+          "preparing": "준비 중",
+          "ready": "준비 완료"
+        }
+      },
+      "progress_percent": { "name": "진행률" },
+      "eta_min": { "name": "도착 최소" },
+      "eta_max": { "name": "도착 최대" },
+      "original_eta": { "name": "최초 도착 예정 시간" },
+      "poll_interval_sec": { "name": "권장 폴링 간격" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "활성 주문" },
+      "is_late": { "name": "지연됨" },
+      "chat_available": { "name": "채팅 사용 가능" }
+    },
+    "device_tracker": {
+      "courier": { "name": "배달원 위치" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "주문 상태가 '예약됨'으로 바뀔 때",
+      "preparing": "주문 상태가 '준비 중'으로 바뀔 때",
+      "courier_assigned": "주문 상태가 '준비 중, 배달원 배정됨'으로 바뀔 때",
+      "courier_waiting": "주문 상태가 '배달원이 매장에서 대기 중'으로 바뀔 때",
+      "awaiting_pickup": "주문 상태가 '매장이 배달원을 기다리는 중'으로 바뀔 때",
+      "on_the_way": "주문 상태가 '배달원이 당신에게 가는 중'으로 바뀔 때",
+      "arriving": "주문 상태가 '배달원이 곧 도착'으로 바뀔 때",
+      "delivered": "주문 상태가 '배달 완료'로 바뀔 때",
+      "canceled": "주문 상태가 '취소됨'으로 바뀔 때"
+    }
+  }
+}

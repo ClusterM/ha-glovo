@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Füeg s Refresh-Token vo glovoapp.com i (localStorage-Schlüssel `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Refresh-Token",
+          "scan_interval": "Aktualisierigsintervall (Sekunde)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo neu authentifiziere",
+        "description": "S gspeicherete Token isch abglehnt worde. Füeg es neus Refresh-Token vo glovoapp.com i.",
+        "data": {
+          "refresh_token": "Refresh-Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültigs Refresh-Token.",
+      "cannot_connect": "Verbindig zu Glovo isch fählgschlage."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo isch scho konfiguriert.",
+      "reauth_successful": "Neu-Authentifizierig isch erfolgrich gsi."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo-Optione",
+        "description": "Lass s Token-Fäld läär, zum s aktuelle behalte.",
+        "data": {
+          "scan_interval": "Aktualisierigsintervall (Sekunde)",
+          "refresh_token": "Neus Refresh-Token (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültigs Refresh-Token.",
+      "cannot_connect": "Verbindig zu Glovo isch fählgschlage."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Bstellig-Status",
+        "state": {
+          "scheduled": "Plant",
+          "preparing": "Wird zuebereitet",
+          "courier_assigned": "Wird zuebereitet, Kurier zuegwise",
+          "courier_waiting": "Kurier wartet im Gschäft",
+          "awaiting_pickup": "Gschäft wartet uf de Kurier",
+          "on_the_way": "Kurier isch underwägs zu dir",
+          "arriving": "Kurier chunnt glii a",
+          "delivered": "Gliferet",
+          "canceled": "Abbroche",
+          "unknown": "Unbekannt"
+        }
+      },
+      "step": {
+        "name": "Phase",
+        "state": {
+          "scheduled": "Plant",
+          "in_progress": "Am Laufe",
+          "delivered": "Gliferet",
+          "canceled": "Abbroche"
+        }
+      },
+      "store_name": { "name": "Gschäft" },
+      "order_count": { "name": "Aktivi Bstellige" },
+      "courier_name": { "name": "Name vom Kurier" },
+      "courier_status": {
+        "name": "Kurier-Status",
+        "state": {
+          "assigned": "Zuegwise",
+          "waiting": "Wartet im Gschäft",
+          "on_the_way": "Underwägs",
+          "arriving": "Chunnt a"
+        }
+      },
+      "partner_status": {
+        "name": "Gschäft-Status",
+        "state": {
+          "preparing": "Bereitet zue",
+          "ready": "Parat"
+        }
+      },
+      "progress_percent": { "name": "Fortschritt" },
+      "eta_min": { "name": "Achunft min." },
+      "eta_max": { "name": "Achunft max." },
+      "original_eta": { "name": "Ursprünglichi Achunftszit" },
+      "poll_interval_sec": { "name": "Empfohlets Abfragintervall" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktivi Bstellig" },
+      "is_late": { "name": "Verspätet" },
+      "chat_available": { "name": "Chat verfüegbar" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Kurier-Standort" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Bstellig-Status wird: plant",
+      "preparing": "Bstellig-Status wird: wird zuebereitet",
+      "courier_assigned": "Bstellig-Status wird: wird zuebereitet, Kurier zuegwise",
+      "courier_waiting": "Bstellig-Status wird: Kurier wartet im Gschäft",
+      "awaiting_pickup": "Bstellig-Status wird: Gschäft wartet uf de Kurier",
+      "on_the_way": "Bstellig-Status wird: Kurier isch underwägs zu dir",
+      "arriving": "Bstellig-Status wird: Kurier chunnt glii a",
+      "delivered": "Bstellig-Status wird: gliferet",
+      "canceled": "Bstellig-Status wird: abbroche"
+    }
+  }
+}

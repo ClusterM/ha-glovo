@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Límdu inn endurnýjunartókenið frá glovoapp.com (localStorage-lykillinn `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Endurnýjunartóken",
+          "scan_interval": "Uppfærslubil (sekúndur)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Auðkenna Glovo aftur",
+        "description": "Vistaða tókeninu var hafnað. Límdu inn nýtt endurnýjunartóken frá glovoapp.com.",
+        "data": {
+          "refresh_token": "Endurnýjunartóken"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ógilt endurnýjunartóken.",
+      "cannot_connect": "Tókst ekki að tengjast Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo er þegar uppsett.",
+      "reauth_successful": "Endurauðkenning tókst."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo-stillingar",
+        "description": "Skildu tóken-reitinn eftir auðan til að halda núverandi tókeni.",
+        "data": {
+          "scan_interval": "Uppfærslubil (sekúndur)",
+          "refresh_token": "Nýtt endurnýjunartóken (valfrjálst)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ógilt endurnýjunartóken.",
+      "cannot_connect": "Tókst ekki að tengjast Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Staða pöntunar",
+        "state": {
+          "scheduled": "Áætluð",
+          "preparing": "Í undirbúningi",
+          "courier_assigned": "Í undirbúningi, sendill úthlutaður",
+          "courier_waiting": "Sendill bíður í versluninni",
+          "awaiting_pickup": "Verslunin bíður eftir sendli",
+          "on_the_way": "Sendillinn er á leiðinni til þín",
+          "arriving": "Sendillinn er að koma",
+          "delivered": "Afhent",
+          "canceled": "Hætt við",
+          "unknown": "Óþekkt"
+        }
+      },
+      "step": {
+        "name": "Þrep",
+        "state": {
+          "scheduled": "Áætluð",
+          "in_progress": "Í vinnslu",
+          "delivered": "Afhent",
+          "canceled": "Hætt við"
+        }
+      },
+      "store_name": { "name": "Verslun" },
+      "order_count": { "name": "Virkar pantanir" },
+      "courier_name": { "name": "Nafn sendils" },
+      "courier_status": {
+        "name": "Staða sendils",
+        "state": {
+          "assigned": "Úthlutaður",
+          "waiting": "Bíður í versluninni",
+          "on_the_way": "Á leiðinni",
+          "arriving": "Að koma"
+        }
+      },
+      "partner_status": {
+        "name": "Staða verslunar",
+        "state": {
+          "preparing": "Undirbýr",
+          "ready": "Tilbúin"
+        }
+      },
+      "progress_percent": { "name": "Framvinda" },
+      "eta_min": { "name": "Koma lágm." },
+      "eta_max": { "name": "Koma hám." },
+      "original_eta": { "name": "Upprunalegur komutími" },
+      "poll_interval_sec": { "name": "Ráðlagt fyrirspurnabil" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Virk pöntun" },
+      "is_late": { "name": "Á eftir áætlun" },
+      "chat_available": { "name": "Spjall í boði" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Staðsetning sendils" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Staða pöntunar verður: áætluð",
+      "preparing": "Staða pöntunar verður: í undirbúningi",
+      "courier_assigned": "Staða pöntunar verður: í undirbúningi, sendill úthlutaður",
+      "courier_waiting": "Staða pöntunar verður: sendill bíður í versluninni",
+      "awaiting_pickup": "Staða pöntunar verður: verslunin bíður eftir sendli",
+      "on_the_way": "Staða pöntunar verður: sendillinn er á leiðinni til þín",
+      "arriving": "Staða pöntunar verður: sendillinn er að koma",
+      "delivered": "Staða pöntunar verður: afhent",
+      "canceled": "Staða pöntunar verður: hætt við"
+    }
+  }
+}

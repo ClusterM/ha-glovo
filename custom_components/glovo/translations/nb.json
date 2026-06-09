@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Lim inn oppdateringstokenet fra glovoapp.com (localStorage-nøkkelen `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Oppdateringstoken",
+          "scan_interval": "Oppdateringsintervall (sekunder)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Autentiser Glovo på nytt",
+        "description": "Det lagrede tokenet ble avvist. Lim inn et nytt oppdateringstoken fra glovoapp.com.",
+        "data": {
+          "refresh_token": "Oppdateringstoken"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ugyldig oppdateringstoken.",
+      "cannot_connect": "Kunne ikke koble til Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo er allerede konfigurert.",
+      "reauth_successful": "Ny autentisering var vellykket."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo-alternativer",
+        "description": "La token-feltet stå tomt for å beholde det nåværende.",
+        "data": {
+          "scan_interval": "Oppdateringsintervall (sekunder)",
+          "refresh_token": "Nytt oppdateringstoken (valgfritt)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ugyldig oppdateringstoken.",
+      "cannot_connect": "Kunne ikke koble til Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Ordrestatus",
+        "state": {
+          "scheduled": "Planlagt",
+          "preparing": "Tilberedes",
+          "courier_assigned": "Tilberedes, bud tildelt",
+          "courier_waiting": "Budet venter i butikken",
+          "awaiting_pickup": "Butikken venter på bud",
+          "on_the_way": "Budet er på vei til deg",
+          "arriving": "Budet er snart fremme",
+          "delivered": "Levert",
+          "canceled": "Avbrutt",
+          "unknown": "Ukjent"
+        }
+      },
+      "step": {
+        "name": "Trinn",
+        "state": {
+          "scheduled": "Planlagt",
+          "in_progress": "Pågår",
+          "delivered": "Levert",
+          "canceled": "Avbrutt"
+        }
+      },
+      "store_name": { "name": "Butikk" },
+      "order_count": { "name": "Aktive ordrer" },
+      "courier_name": { "name": "Budets navn" },
+      "courier_status": {
+        "name": "Budstatus",
+        "state": {
+          "assigned": "Tildelt",
+          "waiting": "Venter i butikken",
+          "on_the_way": "På vei",
+          "arriving": "Ankommer"
+        }
+      },
+      "partner_status": {
+        "name": "Butikkstatus",
+        "state": {
+          "preparing": "Tilbereder",
+          "ready": "Klar"
+        }
+      },
+      "progress_percent": { "name": "Fremdrift" },
+      "eta_min": { "name": "Ankomst min." },
+      "eta_max": { "name": "Ankomst maks." },
+      "original_eta": { "name": "Opprinnelig ankomsttid" },
+      "poll_interval_sec": { "name": "Anbefalt pollingintervall" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktiv ordre" },
+      "is_late": { "name": "Forsinket" },
+      "chat_available": { "name": "Chat tilgjengelig" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Budets plassering" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Ordrestatus blir: planlagt",
+      "preparing": "Ordrestatus blir: tilberedes",
+      "courier_assigned": "Ordrestatus blir: tilberedes, bud tildelt",
+      "courier_waiting": "Ordrestatus blir: budet venter i butikken",
+      "awaiting_pickup": "Ordrestatus blir: butikken venter på bud",
+      "on_the_way": "Ordrestatus blir: budet er på vei til deg",
+      "arriving": "Ordrestatus blir: budet er snart fremme",
+      "delivered": "Ordrestatus blir: levert",
+      "canceled": "Ordrestatus blir: avbrutt"
+    }
+  }
+}

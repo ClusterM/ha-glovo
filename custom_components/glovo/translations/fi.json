@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Liitä päivitystunnus osoitteesta glovoapp.com (localStorage-avain `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Päivitystunnus",
+          "scan_interval": "Päivitysväli (sekuntia)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Tunnistaudu Glovoon uudelleen",
+        "description": "Tallennettu tunnus hylättiin. Liitä uusi päivitystunnus osoitteesta glovoapp.com.",
+        "data": {
+          "refresh_token": "Päivitystunnus"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Virheellinen päivitystunnus.",
+      "cannot_connect": "Yhteyttä Glovoon ei voitu muodostaa."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo on jo määritetty.",
+      "reauth_successful": "Uudelleentunnistautuminen onnistui."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovon asetukset",
+        "description": "Jätä tunnuskenttä tyhjäksi säilyttääksesi nykyisen.",
+        "data": {
+          "scan_interval": "Päivitysväli (sekuntia)",
+          "refresh_token": "Uusi päivitystunnus (valinnainen)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Virheellinen päivitystunnus.",
+      "cannot_connect": "Yhteyttä Glovoon ei voitu muodostaa."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Tilauksen tila",
+        "state": {
+          "scheduled": "Ajastettu",
+          "preparing": "Valmistellaan",
+          "courier_assigned": "Valmistellaan, lähetti määritetty",
+          "courier_waiting": "Lähetti odottaa myymälässä",
+          "awaiting_pickup": "Myymälä odottaa lähettiä",
+          "on_the_way": "Lähetti on matkalla luoksesi",
+          "arriving": "Lähetti saapuu pian",
+          "delivered": "Toimitettu",
+          "canceled": "Peruutettu",
+          "unknown": "Tuntematon"
+        }
+      },
+      "step": {
+        "name": "Vaihe",
+        "state": {
+          "scheduled": "Ajastettu",
+          "in_progress": "Käynnissä",
+          "delivered": "Toimitettu",
+          "canceled": "Peruutettu"
+        }
+      },
+      "store_name": { "name": "Myymälä" },
+      "order_count": { "name": "Aktiiviset tilaukset" },
+      "courier_name": { "name": "Lähetin nimi" },
+      "courier_status": {
+        "name": "Lähetin tila",
+        "state": {
+          "assigned": "Määritetty",
+          "waiting": "Odottaa myymälässä",
+          "on_the_way": "Matkalla",
+          "arriving": "Saapuu"
+        }
+      },
+      "partner_status": {
+        "name": "Myymälän tila",
+        "state": {
+          "preparing": "Valmistelee",
+          "ready": "Valmis"
+        }
+      },
+      "progress_percent": { "name": "Edistyminen" },
+      "eta_min": { "name": "Saapuminen min." },
+      "eta_max": { "name": "Saapuminen maks." },
+      "original_eta": { "name": "Alkuperäinen saapumisaika" },
+      "poll_interval_sec": { "name": "Suositeltu kyselyväli" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktiivinen tilaus" },
+      "is_late": { "name": "Myöhässä" },
+      "chat_available": { "name": "Chat käytettävissä" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Lähetin sijainti" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Tilauksen tilaksi tulee: ajastettu",
+      "preparing": "Tilauksen tilaksi tulee: valmistellaan",
+      "courier_assigned": "Tilauksen tilaksi tulee: valmistellaan, lähetti määritetty",
+      "courier_waiting": "Tilauksen tilaksi tulee: lähetti odottaa myymälässä",
+      "awaiting_pickup": "Tilauksen tilaksi tulee: myymälä odottaa lähettiä",
+      "on_the_way": "Tilauksen tilaksi tulee: lähetti on matkalla luoksesi",
+      "arriving": "Tilauksen tilaksi tulee: lähetti saapuu pian",
+      "delivered": "Tilauksen tilaksi tulee: toimitettu",
+      "canceled": "Tilauksen tilaksi tulee: peruutettu"
+    }
+  }
+}

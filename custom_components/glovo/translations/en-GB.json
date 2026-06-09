@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Paste the refresh token from glovoapp.com (localStorage key `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Refresh token",
+          "scan_interval": "Update interval (seconds)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate Glovo",
+        "description": "The stored token was rejected. Paste a fresh refresh token from glovoapp.com.",
+        "data": {
+          "refresh_token": "Refresh token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid refresh token.",
+      "cannot_connect": "Failed to connect to Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo is already configured.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo options",
+        "description": "Leave the refresh token empty to keep the current one.",
+        "data": {
+          "scan_interval": "Update interval (seconds)",
+          "refresh_token": "New refresh token (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid refresh token.",
+      "cannot_connect": "Failed to connect to Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Order status",
+        "state": {
+          "scheduled": "Scheduled",
+          "preparing": "Preparing",
+          "courier_assigned": "Preparing, courier assigned",
+          "courier_waiting": "Courier waiting at store",
+          "awaiting_pickup": "Store awaiting courier",
+          "on_the_way": "Courier on the way to you",
+          "arriving": "Courier arriving at your location",
+          "delivered": "Delivered",
+          "canceled": "Cancelled",
+          "unknown": "Unknown"
+        }
+      },
+      "step": {
+        "name": "Stage",
+        "state": {
+          "scheduled": "Scheduled",
+          "in_progress": "In progress",
+          "delivered": "Delivered",
+          "canceled": "Cancelled"
+        }
+      },
+      "store_name": { "name": "Store" },
+      "order_count": { "name": "Active orders" },
+      "courier_name": { "name": "Courier name" },
+      "courier_status": {
+        "name": "Courier status",
+        "state": {
+          "assigned": "Assigned",
+          "waiting": "Waiting at store",
+          "on_the_way": "On the way",
+          "arriving": "Arriving"
+        }
+      },
+      "partner_status": {
+        "name": "Store status",
+        "state": {
+          "preparing": "Preparing",
+          "ready": "Ready"
+        }
+      },
+      "progress_percent": { "name": "Progress" },
+      "eta_min": { "name": "ETA min" },
+      "eta_max": { "name": "ETA max" },
+      "original_eta": { "name": "Original ETA" },
+      "poll_interval_sec": { "name": "Recommended poll interval" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Active order" },
+      "is_late": { "name": "Late" },
+      "chat_available": { "name": "Chat available" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Courier location" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Order status becomes scheduled",
+      "preparing": "Order status becomes preparing",
+      "courier_assigned": "Order status becomes preparing, courier assigned",
+      "courier_waiting": "Order status becomes courier waiting at store",
+      "awaiting_pickup": "Order status becomes store awaiting courier",
+      "on_the_way": "Order status becomes courier on the way to you",
+      "arriving": "Order status becomes courier arriving at your location",
+      "delivered": "Order status becomes delivered",
+      "canceled": "Order status becomes cancelled"
+    }
+  }
+}

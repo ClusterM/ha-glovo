@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "Plak it ferfarsk-token fan glovoapp.com (localStorage-kaai `glovo_refresh_token`).",
+        "data": {
+          "refresh_token": "Ferfarsk-token",
+          "scan_interval": "Fernijingsynterfal (sekonden)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo opnij autentisearje",
+        "description": "It opsleine token is wegere. Plak in nij ferfarsk-token fan glovoapp.com.",
+        "data": {
+          "refresh_token": "Ferfarsk-token"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ûnjildich ferfarsk-token.",
+      "cannot_connect": "Kin gjin ferbining meitsje mei Glovo."
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo is al konfigurearre.",
+      "reauth_successful": "Opnij autentisearjen is slagge."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo-opsjes",
+        "description": "Lit it tokenfjild leech om it hjoeddeiske te behâlden.",
+        "data": {
+          "scan_interval": "Fernijingsynterfal (sekonden)",
+          "refresh_token": "Nij ferfarsk-token (opsjoneel)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ûnjildich ferfarsk-token.",
+      "cannot_connect": "Kin gjin ferbining meitsje mei Glovo."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "Bestellingsstatus",
+        "state": {
+          "scheduled": "Pland",
+          "preparing": "Wurdt taret",
+          "courier_assigned": "Wurdt taret, koerier tawiisd",
+          "courier_waiting": "Koerier wachtet yn de winkel",
+          "awaiting_pickup": "Winkel wachtet op koerier",
+          "on_the_way": "Koerier is ûnderweis nei dy",
+          "arriving": "Koerier komt der oan",
+          "delivered": "Besoarge",
+          "canceled": "Annulearre",
+          "unknown": "Ûnbekend"
+        }
+      },
+      "step": {
+        "name": "Faze",
+        "state": {
+          "scheduled": "Pland",
+          "in_progress": "Dwaande",
+          "delivered": "Besoarge",
+          "canceled": "Annulearre"
+        }
+      },
+      "store_name": { "name": "Winkel" },
+      "order_count": { "name": "Aktive bestellingen" },
+      "courier_name": { "name": "Namme koerier" },
+      "courier_status": {
+        "name": "Koerierstatus",
+        "state": {
+          "assigned": "Tawiisd",
+          "waiting": "Wachtet yn de winkel",
+          "on_the_way": "Ûnderweis",
+          "arriving": "Komt der oan"
+        }
+      },
+      "partner_status": {
+        "name": "Winkelstatus",
+        "state": {
+          "preparing": "Taret",
+          "ready": "Klear"
+        }
+      },
+      "progress_percent": { "name": "Foartgong" },
+      "eta_min": { "name": "Oankomst min." },
+      "eta_max": { "name": "Oankomst maks." },
+      "original_eta": { "name": "Oarspronklike oankomsttiid" },
+      "poll_interval_sec": { "name": "Oanrette pollynterfal" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "Aktive bestelling" },
+      "is_late": { "name": "Te let" },
+      "chat_available": { "name": "Chat beskikber" }
+    },
+    "device_tracker": {
+      "courier": { "name": "Lokaasje koerier" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "Bestellingsstatus wurdt: pland",
+      "preparing": "Bestellingsstatus wurdt: wurdt taret",
+      "courier_assigned": "Bestellingsstatus wurdt: wurdt taret, koerier tawiisd",
+      "courier_waiting": "Bestellingsstatus wurdt: koerier wachtet yn de winkel",
+      "awaiting_pickup": "Bestellingsstatus wurdt: winkel wachtet op koerier",
+      "on_the_way": "Bestellingsstatus wurdt: koerier is ûnderweis nei dy",
+      "arriving": "Bestellingsstatus wurdt: koerier komt der oan",
+      "delivered": "Bestellingsstatus wurdt: besoarge",
+      "canceled": "Bestellingsstatus wurdt: annulearre"
+    }
+  }
+}

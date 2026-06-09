@@ -1,0 +1,118 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Glovo",
+        "description": "glovoapp.com থেকে রিফ্রেশ টোকেন পেস্ট করুন (localStorage কী `glovo_refresh_token`)।",
+        "data": {
+          "refresh_token": "রিফ্রেশ টোকেন",
+          "scan_interval": "আপডেটের ব্যবধান (সেকেন্ড)"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Glovo পুনরায় প্রমাণীকরণ করুন",
+        "description": "সংরক্ষিত টোকেনটি প্রত্যাখ্যান করা হয়েছে। glovoapp.com থেকে একটি নতুন রিফ্রেশ টোকেন পেস্ট করুন।",
+        "data": {
+          "refresh_token": "রিফ্রেশ টোকেন"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "অবৈধ রিফ্রেশ টোকেন।",
+      "cannot_connect": "Glovo-তে সংযোগ করা যায়নি।"
+    },
+    "abort": {
+      "single_instance_allowed": "Glovo ইতিমধ্যে কনফিগার করা হয়েছে।",
+      "reauth_successful": "পুনরায় প্রমাণীকরণ সফল হয়েছে।"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Glovo বিকল্প",
+        "description": "বর্তমান টোকেন বজায় রাখতে টোকেন ক্ষেত্রটি খালি রাখুন।",
+        "data": {
+          "scan_interval": "আপডেটের ব্যবধান (সেকেন্ড)",
+          "refresh_token": "নতুন রিফ্রেশ টোকেন (ঐচ্ছিক)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "অবৈধ রিফ্রেশ টোকেন।",
+      "cannot_connect": "Glovo-তে সংযোগ করা যায়নি।"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overall_status": {
+        "name": "অর্ডারের অবস্থা",
+        "state": {
+          "scheduled": "নির্ধারিত",
+          "preparing": "প্রস্তুত করা হচ্ছে",
+          "courier_assigned": "প্রস্তুত করা হচ্ছে, কুরিয়ার নিয়োগ করা হয়েছে",
+          "courier_waiting": "কুরিয়ার দোকানে অপেক্ষা করছে",
+          "awaiting_pickup": "দোকান কুরিয়ারের জন্য অপেক্ষা করছে",
+          "on_the_way": "কুরিয়ার আপনার দিকে আসছে",
+          "arriving": "কুরিয়ার প্রায় পৌঁছে গেছে",
+          "delivered": "ডেলিভারি হয়েছে",
+          "canceled": "বাতিল করা হয়েছে",
+          "unknown": "অজানা"
+        }
+      },
+      "step": {
+        "name": "ধাপ",
+        "state": {
+          "scheduled": "নির্ধারিত",
+          "in_progress": "চলমান",
+          "delivered": "ডেলিভারি হয়েছে",
+          "canceled": "বাতিল করা হয়েছে"
+        }
+      },
+      "store_name": { "name": "দোকান" },
+      "order_count": { "name": "সক্রিয় অর্ডার" },
+      "courier_name": { "name": "কুরিয়ারের নাম" },
+      "courier_status": {
+        "name": "কুরিয়ারের অবস্থা",
+        "state": {
+          "assigned": "নিয়োগ করা হয়েছে",
+          "waiting": "দোকানে অপেক্ষা করছে",
+          "on_the_way": "পথে",
+          "arriving": "পৌঁছাচ্ছে"
+        }
+      },
+      "partner_status": {
+        "name": "দোকানের অবস্থা",
+        "state": {
+          "preparing": "প্রস্তুত করছে",
+          "ready": "প্রস্তুত"
+        }
+      },
+      "progress_percent": { "name": "অগ্রগতি" },
+      "eta_min": { "name": "পৌঁছানো সর্বনিম্ন" },
+      "eta_max": { "name": "পৌঁছানো সর্বোচ্চ" },
+      "original_eta": { "name": "মূল পৌঁছানোর সময়" },
+      "poll_interval_sec": { "name": "প্রস্তাবিত পোলিং ব্যবধান" }
+    },
+    "binary_sensor": {
+      "has_active_order": { "name": "সক্রিয় অর্ডার" },
+      "is_late": { "name": "বিলম্বিত" },
+      "chat_available": { "name": "চ্যাট উপলব্ধ" }
+    },
+    "device_tracker": {
+      "courier": { "name": "কুরিয়ারের অবস্থান" }
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "scheduled": "অর্ডারের অবস্থা হয়: নির্ধারিত",
+      "preparing": "অর্ডারের অবস্থা হয়: প্রস্তুত করা হচ্ছে",
+      "courier_assigned": "অর্ডারের অবস্থা হয়: প্রস্তুত করা হচ্ছে, কুরিয়ার নিয়োগ করা হয়েছে",
+      "courier_waiting": "অর্ডারের অবস্থা হয়: কুরিয়ার দোকানে অপেক্ষা করছে",
+      "awaiting_pickup": "অর্ডারের অবস্থা হয়: দোকান কুরিয়ারের জন্য অপেক্ষা করছে",
+      "on_the_way": "অর্ডারের অবস্থা হয়: কুরিয়ার আপনার দিকে আসছে",
+      "arriving": "অর্ডারের অবস্থা হয়: কুরিয়ার প্রায় পৌঁছে গেছে",
+      "delivered": "অর্ডারের অবস্থা হয়: ডেলিভারি হয়েছে",
+      "canceled": "অর্ডারের অবস্থা হয়: বাতিল করা হয়েছে"
+    }
+  }
+}
