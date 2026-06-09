@@ -2,6 +2,8 @@
 
 Home Assistant custom integration for the [Glovo](https://glovoapp.com/) delivery service. It logs into your Glovo customer account and exposes live information about your current order — status, ETA, courier, progress — as Home Assistant sensors, binary sensors, and a courier `device_tracker` you can put on the map.
 
+<img width="762" height="805" alt="image" src="https://github.com/user-attachments/assets/8436c379-c27b-4b2e-ad47-7d55cd03c24f" />
+
 ## Features
 
 - **Live order tracking** — overall status, delivery stage, store, progress percent, and ETA
