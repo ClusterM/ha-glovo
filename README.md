@@ -49,6 +49,8 @@ Use **Configure** (Options) later to change the update interval, or to paste a n
 
 > Only a single Glovo account (one integration entry) is supported.
 
+Make sure your Home Assistant **timezone** is set correctly under **Settings → System → General**. ETA windows (`Original ETA`, scheduled delivery times) and minute countdowns (`ETA min` / `ETA max`) are calculated in that timezone — a wrong value will shift all arrival times.
+
 ## Entities
 
 All entities are grouped under one **Glovo** device. When there is no active order, sensors report empty/idle values rather than becoming unavailable.

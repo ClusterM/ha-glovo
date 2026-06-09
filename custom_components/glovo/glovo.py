@@ -139,7 +139,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Callable
 from typing import Any, Literal
@@ -973,12 +973,24 @@ def _courier_count(
     return max(len(timeline_couriers), len(courier_markers))
 
 
-def _ms_to_datetime(value: int | float | str | None) -> datetime | None:
-    """Convert a Glovo epoch-millis field to a local datetime."""
+def _resolve_now(now: datetime | None) -> datetime:
+    """Normalize now to a timezone-aware datetime for ETA math."""
+    if now is None:
+        return datetime.now().astimezone()
+    if now.tzinfo is None:
+        return now.astimezone()
+    return now
+
+
+def _ms_to_local_datetime(
+    value: int | float | str | None, *, now: datetime
+) -> datetime | None:
+    """Convert a Glovo epoch-millis field to a datetime in ``now``'s timezone."""
     if value is None:
         return None
     try:
-        return datetime.fromtimestamp(float(value) / 1000)
+        utc = datetime.fromtimestamp(float(value) / 1000, tz=timezone.utc)
+        return utc.astimezone(_resolve_now(now).tzinfo)
     except (OSError, OverflowError, TypeError, ValueError):
         return None
 
@@ -1010,11 +1022,12 @@ def _parse_scheduled_eta(
     if not info:
         return empty
 
-    start = _ms_to_datetime(info.get("scheduledTime"))
+    resolved_now = _resolve_now(now)
+    start = _ms_to_local_datetime(info.get("scheduledTime"), now=resolved_now)
     if start is None:
         return empty
 
-    end = _ms_to_datetime(info.get("scheduledTimeEnd")) or start
+    end = _ms_to_local_datetime(info.get("scheduledTimeEnd"), now=resolved_now) or start
     if end < start:
         start, end = end, start
 
@@ -1028,8 +1041,8 @@ def _parse_scheduled_eta(
 
     return {
         "format": "timestamp",
-        "min": _minutes_until(start, now or datetime.now()),
-        "max": _minutes_until(end, now or datetime.now()),
+        "min": _minutes_until(start, resolved_now),
+        "max": _minutes_until(end, resolved_now),
         "text": text,
         "former": None,
     }
@@ -1066,10 +1079,10 @@ def _parse_eta(tracking: dict[str, Any], now: datetime | None = None) -> dict[st
       * timestamp format -> minutes left to the lower / upper clock-time bound
         (e.g. "16:05 - 16:25" => min=minutes to 16:05, max=minutes to 16:25);
       * countdown format -> min == max == the reported minutes value.
-    Clock-time bounds are computed against the local timezone.
+    Clock-time bounds are computed against the timezone of ``now``. The Home
+    Assistant integration passes ``homeassistant.util.dt.now(hass.config.time_zone)``.
     """
-    if now is None:
-        now = datetime.now()
+    now = _resolve_now(now)
 
     payload = tracking.get("data") or {}
     eta = payload.get("eta") or {}
@@ -1159,6 +1172,7 @@ def summarize_active_order(
     order_id: int | str | None = None,
     info: dict[str, Any] | None = None,
     list_row: dict[str, Any] | None = None,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """Build a flat, Home-Assistant-friendly summary from a tracking response.
 
@@ -1204,9 +1218,10 @@ def summarize_active_order(
 
     lateness = event.get("orderLatenessStatus") or tag.get("id")
     progress = payload.get("progress")
-    eta = _parse_eta(tracking)
+    resolved_now = _resolve_now(now)
+    eta = _parse_eta(tracking, now=resolved_now)
     if eta["min"] is None and eta["max"] is None:
-        scheduled_eta = _parse_scheduled_eta(info)
+        scheduled_eta = _parse_scheduled_eta(info, now=resolved_now)
         if scheduled_eta["min"] is not None or scheduled_eta["max"] is not None:
             eta = scheduled_eta
 
@@ -1275,6 +1290,7 @@ def get_order_summary(
     orders: dict[str, Any] | None = None,
     include_details: bool = True,
     refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
+    now: datetime | None = None,
 ) -> tuple[dict[str, Any], str]:
     """Build a summary for a specific order id, even if it is no longer active.
 
@@ -1301,7 +1317,11 @@ def get_order_summary(
             info = None
 
     summary = summarize_active_order(
-        tracking, order_id=order_id, info=info, list_row=list_row
+        tracking,
+        order_id=order_id,
+        info=info,
+        list_row=list_row,
+        now=now,
     )
     return summary, token_json
 
@@ -1312,6 +1332,7 @@ def get_last_active_order_summary(
     fallback_order_id: int | str | None = None,
     include_details: bool = True,
     refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
+    now: datetime | None = None,
 ) -> tuple[dict[str, Any], str]:
     """Return a flat summary of an active order, or an empty summary if none.
 
@@ -1350,6 +1371,7 @@ def get_last_active_order_summary(
                     orders=orders,
                     include_details=include_details,
                     refresh_margin_sec=refresh_margin_sec,
+                    now=now,
                 )
             except GlovoApiError:
                 return empty_active_order_summary(), token_json
@@ -1374,7 +1396,11 @@ def get_last_active_order_summary(
             info = None
 
     summary = summarize_active_order(
-        tracking, order_id=order_id, info=info, list_row=list_row
+        tracking,
+        order_id=order_id,
+        info=info,
+        list_row=list_row,
+        now=now,
     )
     summary["order_count"] = order_count
     return summary, token_json
@@ -1409,6 +1435,7 @@ def get_last_active_order_summary_from_fixtures(
     *,
     fallback_order_id: int | str | None = None,
     include_details: bool = True,
+    now: datetime | None = None,
 ) -> dict[str, Any]:
     """Build an order summary from local JSON dumps instead of the API.
 
@@ -1443,7 +1470,10 @@ def get_last_active_order_summary_from_fixtures(
         if fallback_order_id is not None:
             info = _load_fixture(root, "order-info.json") if include_details else None
             summary = summarize_active_order(
-                tracking, order_id=fallback_order_id, info=info
+                tracking,
+                order_id=fallback_order_id,
+                info=info,
+                now=now,
             )
             summary["order_count"] = 0
             return summary
@@ -1454,7 +1484,11 @@ def get_last_active_order_summary_from_fixtures(
 
     info = _load_fixture(root, "order-info.json") if include_details else None
     summary = summarize_active_order(
-        tracking, order_id=order_id, info=info, list_row=list_row
+        tracking,
+        order_id=order_id,
+        info=info,
+        list_row=list_row,
+        now=now,
     )
     summary["order_count"] = order_count
     return summary

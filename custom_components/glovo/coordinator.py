@@ -13,6 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as ha_dt
 
 from . import glovo
 from .const import (
@@ -55,6 +56,7 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def _async_update_data(self) -> dict[str, Any]:
         fallback_order_id = self._cached_order_id
+        now = ha_dt.now(ha_dt.get_time_zone(self.hass.config.time_zone))
         fixtures_dir = self.hass.config.path(FIXTURES_REL_PATH)
         if glovo.fixtures_available(fixtures_dir):
             _LOGGER.warning(
@@ -67,6 +69,7 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         glovo.get_last_active_order_summary_from_fixtures,
                         fixtures_dir,
                         fallback_order_id=fallback_order_id,
+                        now=now,
                     )
                 )
             except (OSError, json.JSONDecodeError, RuntimeError) as err:
@@ -79,6 +82,7 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         glovo.get_last_active_order_summary,
                         token_json,
                         fallback_order_id=fallback_order_id,
+                        now=now,
                     )
                 )
             except glovo.GlovoApiError as err:
