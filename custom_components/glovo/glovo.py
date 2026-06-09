@@ -83,7 +83,9 @@ orders, order_count is 0 and all other fields are None. Example fields:
     is_late, lateness, lateness_text,
     eta_format,            # "timestamp" (range) | "countdown" (minutes)
     eta_min, eta_max,      # minutes left to the lower/upper bound (ints);
-                           # equal when the API reports a single countdown
+                           # equal when the API reports a single countdown;
+                           # for scheduled orders, derived from scheduledTime /
+                           # scheduledTimeEnd in v3 order details
     eta_text, eta_former,
     courier_lat, courier_lon, courier_heading,
     poll_interval_sec
@@ -146,6 +148,7 @@ API_URL = "https://api.glovoapp.com"
 DEFAULT_REFRESH_MARGIN_SEC = 60
 TrackingOrigin = Literal["ORDER_TRACKING", "ORDER_DETAILS"]
 TERMINAL_TRACKING_STEPS = frozenset({"DELIVERED", "CANCELED", "CANCELLED"})
+TRACKABLE_STEPS = frozenset({"SCHEDULED", "IN_PROGRESS"})
 
 # Documented field values. Each inner mapping is code -> human-readable meaning.
 # "source" in the comment marks where the values were confirmed:
@@ -794,6 +797,46 @@ def find_active_order_ids(orders_list: dict[str, Any]) -> list[int]:
     return ids
 
 
+def find_trackable_order_ids(
+    orders_list: dict[str, Any],
+    token_json: str,
+    *,
+    refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
+    max_probes: int = 5,
+) -> tuple[list[int], str]:
+    """Return orderIds that should be surfaced in Home Assistant.
+
+    Includes all ACTIVE_ORDER rows. When none exist, probes recent orders-list
+    rows via tracking/summary — scheduled orders appear as INACTIVE_ORDER in the
+    list but report step=SCHEDULED. Stops probing once a terminal step is seen
+    (delivered/canceled history below).
+    """
+    ids = find_active_order_ids(orders_list)
+    if ids:
+        return ids, token_json
+
+    probes = 0
+    for row in orders_list.get("rows") or []:
+        if probes >= max_probes:
+            break
+        order_id = (row.get("data") or {}).get("orderId")
+        if order_id is None:
+            continue
+        probes += 1
+        try:
+            tracking, token_json = get_order_tracking(
+                token_json, order_id, refresh_margin_sec=refresh_margin_sec
+            )
+        except GlovoApiError:
+            continue
+        step = tracking.get("step")
+        if step in TRACKABLE_STEPS:
+            ids.append(order_id)
+        elif step in TERMINAL_TRACKING_STEPS:
+            break
+    return ids, token_json
+
+
 def find_active_order_id(orders_list: dict[str, Any]) -> int | None:
     """Return the orderId of the first ACTIVE_ORDER row, or None."""
     ids = find_active_order_ids(orders_list)
@@ -928,6 +971,68 @@ def _courier_count(
     courier_markers: list[dict[str, Any]],
 ) -> int:
     return max(len(timeline_couriers), len(courier_markers))
+
+
+def _ms_to_datetime(value: int | float | str | None) -> datetime | None:
+    """Convert a Glovo epoch-millis field to a local datetime."""
+    if value is None:
+        return None
+    try:
+        return datetime.fromtimestamp(float(value) / 1000)
+    except (OSError, OverflowError, TypeError, ValueError):
+        return None
+
+
+def _format_local_clock(dt: datetime) -> str:
+    """Format a datetime as a local wall-clock HH:MM string."""
+    return dt.strftime("%H:%M")
+
+
+def _minutes_until(target: datetime, now: datetime) -> int:
+    """Return rounded minutes from now until target (may be negative)."""
+    return round((target - now).total_seconds() / 60)
+
+
+def _parse_scheduled_eta(
+    info: dict[str, Any] | None, now: datetime | None = None
+) -> dict[str, Any]:
+    """Build ETA fields from v3 order details scheduledTime / scheduledTimeEnd.
+
+    Used when tracking/summary has no live ETA yet (typical for step=SCHEDULED).
+    """
+    empty: dict[str, Any] = {
+        "format": None,
+        "min": None,
+        "max": None,
+        "text": None,
+        "former": None,
+    }
+    if not info:
+        return empty
+
+    start = _ms_to_datetime(info.get("scheduledTime"))
+    if start is None:
+        return empty
+
+    end = _ms_to_datetime(info.get("scheduledTimeEnd")) or start
+    if end < start:
+        start, end = end, start
+
+    low_clock = _format_local_clock(start)
+    high_clock = _format_local_clock(end)
+    text = (
+        f"{low_clock} - {high_clock}"
+        if low_clock != high_clock
+        else low_clock
+    )
+
+    return {
+        "format": "timestamp",
+        "min": _minutes_until(start, now or datetime.now()),
+        "max": _minutes_until(end, now or datetime.now()),
+        "text": text,
+        "former": None,
+    }
 
 
 def _clock_to_minutes_left(clock: str | None, now: datetime) -> int | None:
@@ -1100,6 +1205,10 @@ def summarize_active_order(
     lateness = event.get("orderLatenessStatus") or tag.get("id")
     progress = payload.get("progress")
     eta = _parse_eta(tracking)
+    if eta["min"] is None and eta["max"] is None:
+        scheduled_eta = _parse_scheduled_eta(info)
+        if scheduled_eta["min"] is not None or scheduled_eta["max"] is not None:
+            eta = scheduled_eta
 
     overall = compute_overall_status(
         step, event.get("partnerStatus"), event.get("courierStatus")
@@ -1210,9 +1319,11 @@ def get_last_active_order_summary(
     (live state) and, when include_details is True, the v3 order details (for a
     clean courier name and phone). Designed to be polled by Home Assistant.
 
-    When no orders are active, returns empty_active_order_summary() with
-    order_count=0. When several are active, order_count is the total and the
-    remaining fields describe the first ACTIVE_ORDER row.
+    When no orders are trackable, returns empty_active_order_summary() with
+    order_count=0. Trackable orders are ACTIVE_ORDER rows and scheduled orders
+    (INACTIVE_ORDER in the list, step=SCHEDULED in tracking). When several are
+    trackable, order_count is the total and the remaining fields describe the
+    first one.
 
     If no order is active but `fallback_order_id` is given, the summary is built
     from that order's tracking instead (order_count=0). This lets callers keep
@@ -1225,7 +1336,9 @@ def get_last_active_order_summary(
     orders, token_json = get_orders_list(
         token_json, refresh_margin_sec=refresh_margin_sec
     )
-    active_order_ids = find_active_order_ids(orders)
+    active_order_ids, token_json = find_trackable_order_ids(
+        orders, token_json, refresh_margin_sec=refresh_margin_sec
+    )
     order_count = len(active_order_ids)
 
     if order_count == 0:
@@ -1312,6 +1425,19 @@ def get_last_active_order_summary_from_fixtures(
 
     active_order_ids = find_active_order_ids(orders)
     order_count = len(active_order_ids)
+
+    if order_count == 0:
+        step = tracking.get("step")
+        if step in TRACKABLE_STEPS:
+            order_id = (tracking.get("data") or {}).get("orderId")
+            if order_id is None:
+                for row in orders.get("rows") or []:
+                    order_id = (row.get("data") or {}).get("orderId")
+                    if order_id is not None:
+                        break
+            if order_id is not None:
+                active_order_ids = [order_id]
+                order_count = 1
 
     if order_count == 0:
         if fallback_order_id is not None:
