@@ -193,13 +193,13 @@ About {{ states('sensor.glovo_eta_min') }}–{{ states('sensor.glovo_eta_max') }
 {%- if status == 'unknown' -%}
 Похоже, что сейчас нет активных заказов.
 {%- elif status == 'scheduled' -%}
-Заказ из {{ states('sensor.glovo_store') }} запланирован.
+Заказ из {{ states('sensor.glovo_store') }} ещё только запланирован.
 {%- elif status == 'preparing' -%}
 Заказ из {{ states('sensor.glovo_store') }} готовится.
 {%- elif status == 'courier_assigned' -%}
 Заказ из {{ states('sensor.glovo_store') }} собирается, назначен курьер {{ states('sensor.glovo_courier_name') }}.
 {%- elif status == 'courier_waiting' -%}
-Курьер {{ states('sensor.glovo_courier_name') }} ждёт заказа в магазине.
+Курьер {{ states('sensor.glovo_courier_name') }} ждёт заказ в магазине.
 {%- elif status == 'awaiting_pickup' -%}
 Магазин {{ states('sensor.glovo_store') }} ожидает курьера {{ states('sensor.glovo_courier_name') }}.
 {%- elif status == 'on_the_way' -%}
