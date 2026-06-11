@@ -1326,6 +1326,55 @@ def get_order_summary(
     return summary, token_json
 
 
+def _pick_nearest_order(
+    order_ids: list[int],
+    orders: dict[str, Any],
+    token_json: str,
+    *,
+    include_details: bool = True,
+    refresh_margin_sec: int = DEFAULT_REFRESH_MARGIN_SEC,
+    now: datetime | None = None,
+) -> tuple[int | str, str]:
+    """Among multiple trackable orders, return the one with the smallest eta_min.
+
+    Fetches tracking (and optionally info) for each order to compute ETA.
+    Falls back to the first order if ETA cannot be determined for any.
+    """
+    best_id = order_ids[0]
+    best_eta: int | None = None
+
+    for oid in order_ids:
+        try:
+            tracking, token_json = get_order_tracking(
+                token_json, oid, refresh_margin_sec=refresh_margin_sec
+            )
+        except GlovoApiError:
+            continue
+
+        info = None
+        if include_details:
+            try:
+                info, token_json = get_order(
+                    token_json, oid, refresh_margin_sec=refresh_margin_sec
+                )
+            except GlovoApiError:
+                pass
+
+        resolved_now = _resolve_now(now)
+        eta = _parse_eta(tracking, now=resolved_now)
+        if eta["min"] is None:
+            scheduled_eta = _parse_scheduled_eta(info, now=resolved_now)
+            if scheduled_eta["min"] is not None:
+                eta = scheduled_eta
+
+        if eta["min"] is not None:
+            if best_eta is None or eta["min"] < best_eta:
+                best_eta = eta["min"]
+                best_id = oid
+
+    return best_id, token_json
+
+
 def get_last_active_order_summary(
     token_json: str,
     *,
@@ -1379,7 +1428,17 @@ def get_last_active_order_summary(
             return summary, token_json
         return empty_active_order_summary(), token_json
 
-    order_id = active_order_ids[0]
+    # When multiple orders are trackable, pick the one closest to arrival.
+    if len(active_order_ids) == 1:
+        order_id = active_order_ids[0]
+    else:
+        order_id, token_json = _pick_nearest_order(
+            active_order_ids, orders, token_json,
+            include_details=include_details,
+            refresh_margin_sec=refresh_margin_sec,
+            now=now,
+        )
+
     list_row = _list_row_for(orders, order_id)
 
     tracking, token_json = get_order_tracking(
