@@ -46,6 +46,10 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         # active list, instead of immediately flipping to "unknown".
         self._cached_order_id: int | str | None = None
         self._terminal_since: float | None = None
+        # Remember the first ETA text seen for the displayed order so it stays
+        # constant throughout the order lifecycle (original_eta).
+        self._original_eta_order_id: int | str | None = None
+        self._original_eta_value: str | None = None
         super().__init__(
             hass,
             _LOGGER,
@@ -102,6 +106,7 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 )
 
         summary = self._apply_terminal_cache(summary)
+        summary = self._apply_original_eta(summary)
         self._apply_dynamic_interval(summary)
         return summary
 
@@ -151,6 +156,29 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Clear the grace-period cache."""
         self._cached_order_id = None
         self._terminal_since = None
+
+    def _apply_original_eta(self, summary: dict[str, Any]) -> dict[str, Any]:
+        """Pin original_eta to the first ETA value seen for the current order.
+
+        Resets when the displayed order id changes or the order disappears.
+        """
+        order_id = summary.get("order_id")
+
+        if order_id is None:
+            self._original_eta_order_id = None
+            self._original_eta_value = None
+            return summary
+
+        if order_id != self._original_eta_order_id:
+            self._original_eta_order_id = order_id
+            self._original_eta_value = None
+
+        current_eta = summary.get("eta_former") or summary.get("eta_text")
+        if self._original_eta_value is None and current_eta:
+            self._original_eta_value = current_eta
+
+        summary["original_eta"] = self._original_eta_value
+        return summary
 
     def _apply_dynamic_interval(self, summary: dict[str, Any]) -> None:
         """Use the API-recommended poll interval while an order is active."""
