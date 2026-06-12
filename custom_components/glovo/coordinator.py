@@ -174,7 +174,8 @@ class GlovoDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._original_eta_value = None
 
         current_eta = summary.get("eta_former") or summary.get("eta_text")
-        if self._original_eta_value is None and current_eta:
+        has_numeric_eta = summary.get("eta_min") is not None
+        if self._original_eta_value is None and current_eta and has_numeric_eta:
             self._original_eta_value = current_eta
 
         summary["original_eta"] = self._original_eta_value
