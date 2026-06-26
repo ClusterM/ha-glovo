@@ -1131,6 +1131,30 @@ def _parse_eta(tracking: dict[str, Any], now: datetime | None = None) -> dict[st
     }
 
 
+_COURIER_STATUS_PRIORITY = {
+    "ARRIVING": 0,
+    "ON_THE_WAY": 1,
+    "WAITING": 2,
+    "ASSIGNED": 3,
+}
+
+
+def _pick_primary_courier_status(raw: str | None) -> str | None:
+    """Extract the most advanced courier status from a possibly comma-separated value.
+
+    When a split delivery is in progress, Glovo returns e.g. "ARRIVING,ON_THE_WAY".
+    We pick the one closest to arrival (lowest priority number).
+    """
+    if not raw:
+        return None
+    parts = [s.strip() for s in raw.split(",") if s.strip()]
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return parts[0]
+    return min(parts, key=lambda s: _COURIER_STATUS_PRIORITY.get(s, 99))
+
+
 def compute_overall_status(
     step: str | None,
     partner_status: str | None,
@@ -1139,6 +1163,8 @@ def compute_overall_status(
     """Collapse step + partnerStatus + courierStatus into one custom status.
 
     See ENUMS["overall.status"] for the meaning of each returned value.
+    ``courier_status`` may be comma-separated for split deliveries; the most
+    advanced individual status is used.
     """
     if step == "DELIVERED":
         return "DELIVERED"
@@ -1149,19 +1175,21 @@ def compute_overall_status(
     if step != "IN_PROGRESS":
         return "UNKNOWN"
 
+    primary = _pick_primary_courier_status(courier_status)
+
     # Once the courier has left the store its movement drives the status.
-    if courier_status == "ARRIVING":
+    if primary == "ARRIVING":
         return "ARRIVING"
-    if courier_status == "ON_THE_WAY":
+    if primary == "ON_THE_WAY":
         return "ON_THE_WAY"
 
     # Before pickup: courier may be at the store or still on the way.
-    if courier_status == "WAITING":
+    if primary == "WAITING":
         return "AWAITING_PICKUP" if partner_status == "READY" else "COURIER_WAITING"
 
     if partner_status == "READY":
         return "AWAITING_PICKUP"
-    if courier_status == "ASSIGNED":
+    if primary == "ASSIGNED":
         return "COURIER_ASSIGNED"
     return "PREPARING"
 
@@ -1246,9 +1274,9 @@ def summarize_active_order(
         "canceled": step in ("CANCELED", "CANCELLED"),
         "courier_name": courier_name,
         "courier_phone": courier_phone,
-        "courier_status": _ha_enum(event.get("courierStatus")),
+        "courier_status": _ha_enum(_pick_primary_courier_status(event.get("courierStatus"))),
         "courier_status_text": ENUMS["tracking.courierStatus"].get(
-            event.get("courierStatus")
+            _pick_primary_courier_status(event.get("courierStatus"))
         ),
         "courier_message": courier_message,
         "chat_available": primary_courier.get("chatAvailable"),
